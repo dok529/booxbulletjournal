@@ -160,11 +160,13 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
         drawText(ctx, line(weekdayShort[wd - 1], dayFont, black), x: listX + diam + 4, yMid: mid, f: dayFont)
 
         if wd == 2 || d == 1 {
+            // KW-Badge verlinkt auf die Wochenseite
             let kw = cal.component(.weekOfYear, from: date)
             let bw: CGFloat = 17
             ctx.setFillColor(dark)
             pill(ctx, rect(listX + listW - bw - 1, mid - diam / 2, bw, diam), radius: diam / 2)
             drawCentered(ctx, String(kw), f: kwFont, color: white, cx: listX + listW - bw / 2 - 1, yMid: mid)
+            link(rect(listX + listW - bw - 5, y, bw + 5, rowH), to: weekPage(weekIndex(of: date)))
         }
     }
     ctx.setStrokeColor(rule)
@@ -273,6 +275,7 @@ func drawIndex(_ ctx: CGContext) {
     // Seitenzahlen auf dem BOOX durch eingefügte Seiten verschieben.
     let entries = [("Future Log", futurePage(forMonth: 0))]
         + months.indices.map { ("\(monthNames[months[$0].month - 1].capitalized) \(months[$0].year)", monthPage($0)) }
+        + [("Wochen (ab KW \(cal.component(.weekOfYear, from: weeks[0])))", weekPage(0))]
     let ef = font("AvenirNext-Regular", 9.5)
     for (r, (text, target)) in entries.prefix(rows).enumerated() {
         let rowTop = cTop + headH + CGFloat(r) * rowH
@@ -344,18 +347,6 @@ func drawTracker(_ ctx: CGContext) {
     ctx.setStrokeColor(rule); ctx.setLineWidth(0.5)
     strokeLine(ctx, cLeft + 50, cTop + 10, cRight, cTop + 10)
 
-    // Alle Wochen vom Montag vor dem ersten bis einschließlich zum letzten Tag des Zeitraums
-    let firstDay = cal.date(from: DateComponents(year: months[0].year, month: months[0].month, day: 1))!
-    let last = months[months.count - 1]
-    let lastDay = cal.date(byAdding: DateComponents(month: 1, day: -1),
-                           to: cal.date(from: DateComponents(year: last.year, month: last.month, day: 1))!)!
-    var weeks: [Date] = []
-    var w = cal.dateInterval(of: .weekOfYear, for: firstDay)!.start
-    while w <= lastDay {
-        weeks.append(w)
-        w = cal.date(byAdding: .day, value: 7, to: w)!
-    }
-
     let top = cTop + 24, headH: CGFloat = 12, gap: CGFloat = 12
     let perCol = (weeks.count + 1) / 2
     let colW = (cRight - cLeft - gap) / 2, labW: CGFloat = 40
@@ -378,6 +369,7 @@ func drawTracker(_ ctx: CGContext) {
             guard wi < weeks.count else { break }
             let y = top + headH + CGFloat(r) * rh
             drawText(ctx, line("KW \(cal.component(.weekOfYear, from: weeks[wi]))", kf, dark, kern: 0.3), x: bx, yMid: y + rh / 2, f: kf)
+            link(rect(bx, y, labW - 4, rh), to: weekPage(wi))
             for k in 0..<7 {
                 let day = cal.date(byAdding: .day, value: k, to: weeks[wi])!
                 let cell = rect(x0 + CGFloat(k) * cw, y, cw, rh)
@@ -413,18 +405,38 @@ func drawTracker(_ ctx: CGContext) {
 
 // MARK: - Wochenseite (Aufbau wie "Weekly Rolling.pdf": Aufgaben + Mo–So + Next, Stil wie Monatsseite)
 
-func drawWeek(_ ctx: CGContext) {
-    // Kopf: "WOCHE" mit Schreiblinie
+func drawWeek(_ ctx: CGContext, index wi: Int) {
+    let monday = weeks[wi]
+    let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: monday)! }
+
+    // Kopf: KW und Datumsbereich, rechts Navigation (Vor-/Folgewoche, berührte Monate, Index)
     let titleFont = font("AvenirNext-Regular", 18)
-    let title = line("WOCHE", titleFont, black, kern: 1.5)
+    let title = line("KW \(cal.component(.weekOfYear, from: monday))", titleFont, black, kern: 1.5)
     drawText(ctx, title, x: margin, yMid: 30, f: titleFont)
-    let lineX = margin + width(title) + 8
-    ctx.setStrokeColor(rule)
-    ctx.setLineWidth(0.6)
-    strokeLine(ctx, lineX, 38, lineX + 120, 38)
+    let df = DateFormatter()
+    df.dateFormat = "dd.MM."
+    let yf = DateFormatter()
+    yf.dateFormat = "dd.MM.yyyy"
+    let sameYear = cal.component(.year, from: days[0]) == cal.component(.year, from: days[6])
+    let range = "\((sameYear ? df : yf).string(from: days[0])) – \(yf.string(from: days[6]))"
+    let rf = font("AvenirNext-Medium", 9)
+    drawText(ctx, line(range, rf, dark, kern: 1), x: margin + width(title) + 10, yMid: 31, f: rf)
+
+    var nav: [(label: String, target: Int)] = []
+    if wi > 0 { nav.append(("‹", weekPage(wi - 1))) }
+    if wi < weeks.count - 1 { nav.append(("›", weekPage(wi + 1))) }
+    var seen = Set<Int>()
+    for d in days {
+        let ym = (cal.component(.year, from: d), cal.component(.month, from: d))
+        if let mi = months.firstIndex(where: { $0 == ym }), seen.insert(mi).inserted {
+            nav.append((String(monthNames[ym.1 - 1].prefix(3)), monthPage(mi)))
+        }
+    }
+    nav.append(("INDEX", indexPage))
+    navButtons(ctx, nav)
     ctx.setStrokeColor(dark)
+    ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, 48, W - margin, 48)
-    navButtons(ctx, [("INDEX", indexPage)])
 
     let top: CGFloat = 56, bottom = H - margin
     let rows = 21, colW: CGFloat = 22, headH: CGFloat = 24, box: CGFloat = 14
@@ -434,14 +446,19 @@ func drawWeek(_ ctx: CGContext) {
     // Spaltenköpfe, Wochenende grau hinterlegt
     let headFont = font("AvenirNext-DemiBold", 7.5)
     drawText(ctx, line("AUFGABEN", headFont, dark, kern: 1.2), x: margin, yMid: top + headH / 2, f: headFont)
-    let dayFont = font("Menlo-Bold", 7)
+    let dayFont = font("Menlo-Bold", 7), dateFont = font("AvenirNext-Medium", 6.5)
     for (i, label) in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So", "Nx"].enumerated() {
         let x = taskRight + CGFloat(i) * colW
         if i == 5 || i == 6 {
             ctx.setFillColor(light)
             ctx.fill(rect(x + 1, top, colW - 2, bottom - top))
         }
-        drawCentered(ctx, label, f: dayFont, color: black, cx: x + colW / 2, yMid: top + headH / 2)
+        if i < 7 {
+            drawCentered(ctx, label, f: dayFont, color: black, cx: x + colW / 2, yMid: top + 7)
+            drawCentered(ctx, String(cal.component(.day, from: days[i])), f: dateFont, color: dark, cx: x + colW / 2, yMid: top + 17)
+        } else {
+            drawCentered(ctx, label, f: dayFont, color: black, cx: x + colW / 2, yMid: top + headH / 2)
+        }
     }
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.8)
@@ -489,18 +506,32 @@ while (y, m) <= (endYear, endMonth) {
     (y, m) = m == 12 ? (y + 1, 1) : (y, m + 1)
 }
 
+// Alle Wochen vom Montag vor dem ersten bis einschließlich zum letzten Tag des Zeitraums
+let firstDay = cal.date(from: DateComponents(year: months[0].year, month: months[0].month, day: 1))!
+let lastDay = cal.date(byAdding: DateComponents(month: 1, day: -1),
+                       to: cal.date(from: DateComponents(year: endYear, month: endMonth, day: 1))!)!
+var weeks: [Date] = []
+var w = cal.dateInterval(of: .weekOfYear, for: firstDay)!.start
+while w <= lastDay {
+    weeks.append(w)
+    w = cal.date(byAdding: .day, value: 7, to: w)!
+}
+func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
+
 // Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
-// danach die undatierten Vorlagen
+// danach alle Wochen und die undatierten Vorlagen
 let indexPage = 1
 let futureCount = (months.count + 2) / 3
 func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
 func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
+func weekPage(_ i: Int) -> Int { monthPage(months.count) + i }
 
 page(drawCover)
 page(drawIndex)
 for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }
-for draw in [drawWeek, drawDaily, drawTracker] { page(draw) }
+for i in weeks.indices { page { drawWeek($0, index: i) } }
+for draw in [drawDaily, drawTracker] { page(draw) }
 ctx.closePDF()
 
 // Links als GoTo-Annotationen mit explizitem Seitenziel einfügen

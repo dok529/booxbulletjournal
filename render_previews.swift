@@ -23,7 +23,7 @@ let types: [(file: String, page: Int?)] = [
     ("index", find { $0.hasPrefix("INDEX") }),
     ("future-log", find { $0.hasPrefix("FUTURELOG") }),
     ("monat", find { l in monthNames.contains { l.hasPrefix($0 + "20") } }),
-    ("woche", find { $0.hasPrefix("WOCHE") }),
+    ("woche", find { $0.hasPrefix("KW") }),
     ("daily", find { $0.hasPrefix("DATUM/THEMA") }),
     ("gewohnheit", find { $0.hasPrefix("GEWOHNHEIT") }),
 ]
