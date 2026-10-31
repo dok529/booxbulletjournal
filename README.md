@@ -7,12 +7,12 @@ Vorlage importieren); weitere Seiten mit „Page+“ einfügen.
 Navigation über PDF-Links:
 
 - Deckblatt: Monatsleiste → Monat
-- Index: vorbelegte Einträge für Future Log, alle Monate und die Wochen
+- Index: vorbelegte Einträge für Future Log, alle Monate, die Wochen und die Gewohnheiten
 - Future Log: Monatsbalken → Monat, INDEX
 - Monat: ‹ › Vor-/Folgemonat, KW-Badges → Woche, FUTURE LOG, INDEX
 - Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, INDEX
 - Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE LOG, INDEX
-- Daily: FUTURE LOG, INDEX · Gewohnheit: KW-Beschriftungen → Woche, INDEX
+- Gewohnheit: KW-Beschriftungen → Woche, INDEX
 - Alle Seiten außer Deckblatt und Gewohnheit: Knopf ✓ unten rechts → Gewohnheitsseite
 
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
@@ -27,8 +27,7 @@ In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
 | 3–7 | Future Log, drei Monate pro Seite |
 | 8–21 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
 | 22–145 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
-| 146 | Daily / Collection (Punktraster) |
-| 147 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
+| 146 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
 
 Format 458,88 × 597,12 pt (3:4).
 
@@ -39,8 +38,8 @@ Format 458,88 × 597,12 pt (3:4).
 | <img src="previews/deckblatt.png" width="260" alt="Deckblatt"> | <img src="previews/index.png" width="260" alt="Index"> | <img src="previews/future-log.png" width="260" alt="Future Log"> |
 | **Monat** | **Woche** | **Wochen-Daily** |
 | <img src="previews/monat.png" width="260" alt="Monatsseite"> | <img src="previews/woche.png" width="260" alt="Wochenseite"> | <img src="previews/wochen-daily.png" width="260" alt="Wochen-Daily"> |
-| **Daily / Collection** | **Gewohnheit** | |
-| <img src="previews/daily.png" width="260" alt="Daily / Collection"> | <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> | |
+| **Gewohnheit** | | |
+| <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> | | |
 
 ## Neu erzeugen
 

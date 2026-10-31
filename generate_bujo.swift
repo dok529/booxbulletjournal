@@ -1,5 +1,5 @@
-// Erzeugt ein Bullet-Journal-PDF für BOOX Notes: Index, Future Log, Monatsseiten
-// (Tagesliste + Punktraster) und undatierte Vorlagen (Woche, Daily, Tracker).
+// Erzeugt ein Bullet-Journal-PDF für BOOX Notes: Deckblatt, Index, Future Log,
+// Monatsseiten (Tagesliste + Punktraster), Wochen mit Wochen-Daily und Gewohnheitsseite.
 // Navigationsknöpfe sind echte PDF-Links mit festen Seitenzielen; BOOX Notes
 // passt sie an, wenn auf dem Gerät Seiten eingefügt werden.
 // Aufruf: swift generate_bujo.swift [Ausgabe.pdf]
@@ -191,7 +191,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
     }
 }
 
-// MARK: - Weitere Seiten: Index, Future Log, Daily/Collection, Gewohnheits-Tracker
+// MARK: - Weitere Seiten: Deckblatt, Index, Future Log, Gewohnheits-Tracker
 
 let cTop = contentTop, cBottom = H - margin, cLeft = margin, cRight = W - margin
 let gridDot = CGColor(gray: 0.4, alpha: 1)
@@ -278,7 +278,8 @@ func drawIndex(_ ctx: CGContext) {
     // Seitenzahlen auf dem BOOX durch eingefügte Seiten verschieben.
     let entries = [("Future Log", futurePage(forMonth: 0))]
         + months.indices.map { ("\(monthNames[months[$0].month - 1].capitalized) \(months[$0].year)", monthPage($0)) }
-        + [("Wochen (ab KW \(cal.component(.weekOfYear, from: weeks[0])))", weekPage(0))]
+        + [("Wochen (ab KW \(cal.component(.weekOfYear, from: weeks[0])))", weekPage(0)),
+           ("Gewohnheiten", trackerPage)]
     let ef = font("AvenirNext-Regular", 9.5)
     for (r, (text, target)) in entries.prefix(rows).enumerated() {
         let rowTop = cTop + headH + CGFloat(r) * rowH
@@ -324,20 +325,6 @@ func drawFuture(_ ctx: CGContext, page p: Int) {
         strokeLine(ctx, calX + calW + 8, top + barH + 6, calX + calW + 8, top + secH - 8)
         dots(ctx, x0: calX + calW + 16, y0: top + barH + 6, x1: cRight, y1: top + secH - 8)
     }
-}
-
-// 3) Daily / Collection: Thema- bzw. Datumslinie + Seitenzahl, darunter Punktraster
-func drawDaily(_ ctx: CGContext) {
-    let navX = navButtons(ctx, [("FUTURE LOG", futurePage(forMonth: 0)), ("INDEX", indexPage)])
-    let pageX = navX - 12 - 50
-    ctx.setStrokeColor(rule); ctx.setLineWidth(0.6)
-    strokeLine(ctx, margin, headMid + 8, pageX - 12, headMid + 8)
-    label(ctx, "DATUM / THEMA", x: margin, yMid: headMid - 10, color: rule)
-    label(ctx, "SEITE", x: pageX, yMid: headMid - 10, color: rule)
-    strokeLine(ctx, pageX, headMid + 8, pageX + 50, headMid + 8)
-    ctx.setStrokeColor(dark)
-    strokeLine(ctx, margin, headRule, W - margin, headRule)
-    dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
 }
 
 // 4) Gewohnheits-Tracker: eine Seite pro Gewohnheit, alle Wochen des Zeitraums als Zeilen (Mo–So)
@@ -567,13 +554,13 @@ while w <= lastDay {
 func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
 
 // Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
-// danach alle Wochen (je Wochenseite + Wochen-Daily) und die undatierten Vorlagen
+// danach alle Wochen (je Wochenseite + Wochen-Daily) und die Gewohnheitsseite
 let indexPage = 1
 let futureCount = (months.count + 2) / 3
 func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
 func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
 func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
-let trackerPage = weekPage(weeks.count) + 1
+let trackerPage = weekPage(weeks.count)
 
 page(habit: false, drawCover)
 page(drawIndex)
@@ -583,7 +570,6 @@ for i in weeks.indices {
     page { drawWeek($0, index: i) }
     page { drawWeekDaily($0, index: i) }
 }
-page(drawDaily)
 page(habit: false, drawTracker)
 ctx.closePDF()
 

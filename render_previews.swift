@@ -25,7 +25,6 @@ let types: [(file: String, page: Int?)] = [
     ("monat", find { l in monthNames.contains { l.hasPrefix($0 + "20") } }),
     ("woche", find { $0.hasPrefix("KW") }),
     ("wochen-daily", find { $0.first?.isNumber == true }),
-    ("daily", find { $0.hasPrefix("DATUM/THEMA") }),
     ("gewohnheit", find { $0.hasPrefix("GEWOHNHEIT") }),
 ]
 
