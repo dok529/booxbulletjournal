@@ -2,4 +2,7 @@
 !.gitignore
 !README.md
 !generate_bujo.swift
+!render_previews.swift
 !BuJo-Seiten-*.pdf
+!previews/
+!previews/*.png

@@ -23,13 +23,24 @@ In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
 
 Format 458,88 × 597,12 pt (3:4).
 
+## Vorschau
+
+| Index | Future Log | Monat |
+|:---:|:---:|:---:|
+| <img src="previews/index.png" width="260" alt="Index"> | <img src="previews/future-log.png" width="260" alt="Future Log"> | <img src="previews/monat.png" width="260" alt="Monatsseite"> |
+| **Woche** | **Daily / Collection** | **Gewohnheit** |
+| <img src="previews/woche.png" width="260" alt="Wochenseite"> | <img src="previews/daily.png" width="260" alt="Daily / Collection"> | <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> |
+
 ## Neu erzeugen
 
 Zeitraum über `startYear`/`startMonth`/`endYear`/`endMonth` oben in
-`generate_bujo.swift` einstellen, dann:
+`generate_bujo.swift` einstellen, dann PDF und Vorschaubilder erzeugen:
 
 ```bash
-swift generate_bujo.swift
+swift generate_bujo.swift && swift render_previews.swift
 ```
+
+Nach jeder Layout-Änderung beide Befehle ausführen und `previews/` mit
+committen, damit die Vorschau aktuell bleibt.
 
 Benötigt nur macOS (CoreGraphics/CoreText), keine weiteren Abhängigkeiten.
