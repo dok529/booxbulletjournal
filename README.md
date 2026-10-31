@@ -19,7 +19,7 @@ In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
 | 7–20 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
 | 21 | Wochenseite (Aufgaben, Mo–So, Next) |
 | 22 | Daily / Collection (Punktraster) |
-| 23 | Gewohnheits-Tracker (Tage 1–31) |
+| 23 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
 
 Format 458,88 × 597,12 pt (3:4).
 

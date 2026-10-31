@@ -304,25 +304,80 @@ func drawDaily(_ ctx: CGContext) {
     dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
 }
 
-// 4) Gewohnheits-Tracker (undatiert): Gewohnheiten × Tage 1–31
+// 4) Gewohnheits-Tracker: eine Seite pro Gewohnheit, alle Wochen des Zeitraums als Zeilen (Mo–So)
 func drawTracker(_ ctx: CGContext) {
-    pageTitle(ctx, "GEWOHNHEITEN", writeLine: 120)
+    pageTitle(ctx, "GEWOHNHEIT", writeLine: 190)
     navButtons(ctx, [("INDEX", indexPage)])
-    let nameW: CGFloat = 112, headH: CGFloat = 20, rows = 24
-    let colW = (cRight - cLeft - nameW) / 31, rowH = (cBottom - cTop - headH) / CGFloat(rows)
-    let x0 = cLeft + nameW
-    label(ctx, "GEWOHNHEIT", x: cLeft, yMid: cTop + headH / 2)
-    let nf = font("Menlo-Bold", 5.5)
-    ctx.setFillColor(light)
-    ctx.fill(rect(x0, cTop, cRight - x0, headH))
-    for d in 1...31 { drawCentered(ctx, String(d), f: nf, color: black, cx: x0 + (CGFloat(d) - 0.5) * colW, yMid: cTop + headH / 2) }
-    ctx.setStrokeColor(dark); ctx.setLineWidth(0.8)
-    strokeLine(ctx, cLeft, cTop + headH, cRight, cTop + headH)
+
+    // Legende: eine durchgehende Schreibzeile
+    label(ctx, "LEGENDE", x: cLeft, yMid: cTop + 6)
     ctx.setStrokeColor(rule); ctx.setLineWidth(0.5)
-    for r in 1...rows { let y = cTop + headH + CGFloat(r) * rowH; strokeLine(ctx, cLeft, y, cRight, y) }
-    for d in 0...31 {
-        ctx.setLineWidth(d % 7 == 0 ? 0.9 : 0.4)
-        strokeLine(ctx, x0 + CGFloat(d) * colW, cTop, x0 + CGFloat(d) * colW, cBottom)
+    strokeLine(ctx, cLeft + 50, cTop + 10, cRight, cTop + 10)
+
+    // Alle Wochen vom Montag vor dem ersten bis einschließlich zum letzten Tag des Zeitraums
+    let firstDay = cal.date(from: DateComponents(year: months[0].year, month: months[0].month, day: 1))!
+    let last = months[months.count - 1]
+    let lastDay = cal.date(byAdding: DateComponents(month: 1, day: -1),
+                           to: cal.date(from: DateComponents(year: last.year, month: last.month, day: 1))!)!
+    var weeks: [Date] = []
+    var w = cal.dateInterval(of: .weekOfYear, for: firstDay)!.start
+    while w <= lastDay {
+        weeks.append(w)
+        w = cal.date(byAdding: .day, value: 7, to: w)!
+    }
+
+    let top = cTop + 24, headH: CGFloat = 12, gap: CGFloat = 12
+    let perCol = (weeks.count + 1) / 2
+    let colW = (cRight - cLeft - gap) / 2, labW: CGFloat = 40
+    let cw = (colW - labW) / 7, rh = (cBottom - top - headH) / CGFloat(perCol)
+    let hf = font("Menlo-Bold", 6), nf = font("AvenirNext-Medium", 4.8), bf = font("AvenirNext-Bold", 4.8)
+    let kf = font("AvenirNext-DemiBold", 6.5)
+    let outside = CGColor(gray: 0.82, alpha: 1)
+
+    for col in 0..<2 {
+        let bx = cLeft + CGFloat(col) * (colW + gap), x0 = bx + labW
+        for (k, l) in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].enumerated() {
+            if k >= 5 {
+                ctx.setFillColor(light)
+                ctx.fill(rect(x0 + CGFloat(k) * cw, top, cw, cBottom - top))
+            }
+            drawCentered(ctx, l, f: hf, color: k >= 5 ? rule : black, cx: x0 + (CGFloat(k) + 0.5) * cw, yMid: top + headH / 2)
+        }
+        for r in 0..<perCol {
+            let wi = col * perCol + r
+            guard wi < weeks.count else { break }
+            let y = top + headH + CGFloat(r) * rh
+            drawText(ctx, line("KW \(cal.component(.weekOfYear, from: weeks[wi]))", kf, dark, kern: 0.3), x: bx, yMid: y + rh / 2, f: kf)
+            for k in 0..<7 {
+                let day = cal.date(byAdding: .day, value: k, to: weeks[wi])!
+                let cell = rect(x0 + CGFloat(k) * cw, y, cw, rh)
+                if day < firstDay || day > lastDay {
+                    ctx.setFillColor(outside)
+                    ctx.fill(cell)
+                    continue
+                }
+                // Tageszahl klein oben links; am Monatsersten mit Monatskürzel und Stufenlinie
+                let dn = cal.component(.day, from: day)
+                if dn == 1 {
+                    let mon = String(monthNames[cal.component(.month, from: day) - 1].prefix(3))
+                    drawText(ctx, line("1. \(mon)", bf, black), x: cell.minX + 1.5, yMid: y + 3.8, f: bf)
+                    ctx.setStrokeColor(black); ctx.setLineWidth(1.2)
+                    strokeLine(ctx, cell.minX, y, cell.minX, y + rh)
+                    strokeLine(ctx, cell.minX, y, x0 + 7 * cw, y)
+                    if k > 0 { strokeLine(ctx, x0, y + rh, cell.minX, y + rh) }
+                } else {
+                    drawText(ctx, line(String(dn), nf, CGColor(gray: 0.35, alpha: 1)), x: cell.minX + 1.5, yMid: y + 3.8, f: nf)
+                }
+            }
+            ctx.setStrokeColor(rule); ctx.setLineWidth(0.4)
+            strokeLine(ctx, bx, y + rh, x0 + 7 * cw, y + rh)
+        }
+        ctx.setStrokeColor(dark); ctx.setLineWidth(0.8)
+        strokeLine(ctx, bx, top + headH, x0 + 7 * cw, top + headH)
+        ctx.setStrokeColor(rule); ctx.setLineWidth(0.3)
+        for k in 0...7 {
+            strokeLine(ctx, x0 + CGFloat(k) * cw, top + headH, x0 + CGFloat(k) * cw, top + headH + CGFloat(perCol) * rh)
+        }
     }
 }
 
