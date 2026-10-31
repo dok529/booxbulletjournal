@@ -1,8 +1,14 @@
 # BOOX Bullet Journal
 
-Vorlagen-PDF für ein Bullet Journal auf dem BOOX-Reader. Alle Seiten sind einzeln
-und ohne Links, damit man sie auf dem BOOX in ein eigenes Notizbuch übernehmen
-und beliebig oft kopieren kann. Aufbau nach Ryder Carrolls Bullet-Journal-Methode.
+Vorlagen-PDF für ein Bullet Journal auf dem BOOX-Reader, Aufbau nach Ryder
+Carrolls Bullet-Journal-Methode. Das PDF in der Notes-App öffnen (nicht als
+Vorlage importieren); weitere Seiten mit „Page+“ einfügen.
+
+Navigation über PDF-Links: Index (mit vorbelegten Einträgen für Future Log und
+alle Monate) ↔ Future Log, Future-Log-Monatsbalken → Monat, Monatsseiten mit ‹ ›
+sowie FUTURE LOG und INDEX, Daily → FUTURE LOG und INDEX, Woche/Tracker → INDEX.
+In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
+(getestet).
 
 ## Inhalt von `BuJo-Seiten-2026-11_2027-12.pdf`
 
