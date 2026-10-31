@@ -22,6 +22,9 @@ let W: CGFloat = 458.88, H: CGFloat = 597.12
 let margin: CGFloat = 16
 let dotSpacing: CGFloat = 14.173 // 5 mm
 
+// Kopfbereich (von oben): Mitte der Überschrift, Trennlinie, Beginn des Inhalts
+let headMid: CGFloat = 20, headRule: CGFloat = 34, contentTop: CGFloat = 40
+
 let monthNames = ["JANUAR", "FEBRUAR", "MÄRZ", "APRIL", "MAI", "JUNI",
                   "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DEZEMBER"]
 let weekdayShort = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"] // Index = Calendar.weekday - 1
@@ -89,11 +92,11 @@ func navButtons(_ ctx: CGContext, _ items: [(label: String, target: Int)]) -> CG
     var x = W - margin - widths.reduce(0, +) - gap * CGFloat(items.count - 1)
     let left = x
     for (item, w) in zip(items, widths) {
-        let r = rect(x, 30 - h / 2, w, h)
+        let r = rect(x, headMid - h / 2, w, h)
         ctx.setFillColor(dark)
         pill(ctx, r, radius: 3)
         drawCentered(ctx, item.label, f: item.label.count <= 1 ? font("AvenirNext-Bold", 16) : f,
-                     color: white, cx: r.midX, yMid: 30, kern: item.label.count <= 1 ? 0 : 1)
+                     color: white, cx: r.midX, yMid: headMid, kern: item.label.count <= 1 ? 0 : 1)
         link(r, to: item.target)
         x += w + gap
     }
@@ -112,7 +115,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
 
     // Kopf: Monat und Jahr als Überschrift, rechts Navigation
     let titleFont = font("AvenirNext-Regular", 18)
-    drawText(ctx, line("\(monthNames[month - 1]) \(year)", titleFont, black, kern: 1.5), x: margin, yMid: 30, f: titleFont)
+    drawText(ctx, line("\(monthNames[month - 1]) \(year)", titleFont, black, kern: 1.5), x: margin, yMid: headMid, f: titleFont)
     var nav: [(label: String, target: Int)] = []
     if i > 0 { nav.append(("‹", monthPage(i - 1))) }
     if i < months.count - 1 { nav.append(("›", monthPage(i + 1))) }
@@ -121,11 +124,11 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
 
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
-    strokeLine(ctx, margin, 48, W - margin, 48)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
 
     // Linke Spalte: ein Eintrag pro Tag
     let listX = margin, listW: CGFloat = 200
-    let top: CGFloat = 56, bottom = H - margin
+    let top = contentTop, bottom = H - margin
     let rowH = (bottom - top) / CGFloat(days)
     let diam = min(rowH - 3, 14)
     let numFont = font("AvenirNext-Medium", 7.5)
@@ -190,20 +193,20 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
 
 // MARK: - Weitere Seiten: Index, Future Log, Daily/Collection, Gewohnheits-Tracker
 
-let cTop: CGFloat = 56, cBottom = H - margin, cLeft = margin, cRight = W - margin
+let cTop = contentTop, cBottom = H - margin, cLeft = margin, cRight = W - margin
 let gridDot = CGColor(gray: 0.4, alpha: 1)
 
 func pageTitle(_ ctx: CGContext, _ title: String, writeLine: CGFloat = 0) {
     let f = font("AvenirNext-Regular", 18)
     let l = line(title, f, black, kern: 1.5)
-    drawText(ctx, l, x: margin, yMid: 30, f: f)
+    drawText(ctx, l, x: margin, yMid: headMid, f: f)
     if writeLine > 0 {
         let x0 = margin + width(l) + 8
         ctx.setStrokeColor(rule); ctx.setLineWidth(0.6)
-        strokeLine(ctx, x0, 38, x0 + writeLine, 38)
+        strokeLine(ctx, x0, headMid + 8, x0 + writeLine, headMid + 8)
     }
     ctx.setStrokeColor(dark); ctx.setLineWidth(0.6)
-    strokeLine(ctx, margin, 48, W - margin, 48)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
 }
 
 func label(_ ctx: CGContext, _ s: String, x: CGFloat, yMid: CGFloat, color: CGColor = dark) {
@@ -328,12 +331,12 @@ func drawDaily(_ ctx: CGContext) {
     let navX = navButtons(ctx, [("FUTURE LOG", futurePage(forMonth: 0)), ("INDEX", indexPage)])
     let pageX = navX - 12 - 50
     ctx.setStrokeColor(rule); ctx.setLineWidth(0.6)
-    strokeLine(ctx, margin, 38, pageX - 12, 38)
-    label(ctx, "DATUM / THEMA", x: margin, yMid: 18, color: rule)
-    label(ctx, "SEITE", x: pageX, yMid: 18, color: rule)
-    strokeLine(ctx, pageX, 38, pageX + 50, 38)
+    strokeLine(ctx, margin, headMid + 8, pageX - 12, headMid + 8)
+    label(ctx, "DATUM / THEMA", x: margin, yMid: headMid - 10, color: rule)
+    label(ctx, "SEITE", x: pageX, yMid: headMid - 10, color: rule)
+    strokeLine(ctx, pageX, headMid + 8, pageX + 50, headMid + 8)
     ctx.setStrokeColor(dark)
-    strokeLine(ctx, margin, 48, W - margin, 48)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
     dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
 }
 
@@ -412,7 +415,7 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     // Kopf: KW und Datumsbereich, rechts Navigation (Vor-/Folgewoche, berührte Monate, Index)
     let titleFont = font("AvenirNext-Regular", 18)
     let title = line("KW \(cal.component(.weekOfYear, from: monday))", titleFont, black, kern: 1.5)
-    drawText(ctx, title, x: margin, yMid: 30, f: titleFont)
+    drawText(ctx, title, x: margin, yMid: headMid, f: titleFont)
     let df = DateFormatter()
     df.dateFormat = "dd.MM."
     let yf = DateFormatter()
@@ -420,7 +423,7 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     let sameYear = cal.component(.year, from: days[0]) == cal.component(.year, from: days[6])
     let range = "\((sameYear ? df : yf).string(from: days[0])) – \(yf.string(from: days[6]))"
     let rf = font("AvenirNext-Medium", 9)
-    drawText(ctx, line(range, rf, dark, kern: 1), x: margin + width(title) + 10, yMid: 31, f: rf)
+    drawText(ctx, line(range, rf, dark, kern: 1), x: margin + width(title) + 10, yMid: headMid + 1, f: rf)
 
     var nav: [(label: String, target: Int)] = []
     if wi > 0 { nav.append(("‹", weekPage(wi - 1))) }
@@ -436,9 +439,9 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     navButtons(ctx, nav)
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
-    strokeLine(ctx, margin, 48, W - margin, 48)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
 
-    let top: CGFloat = 56, bottom = H - margin
+    let top = contentTop, bottom = H - margin
     let rows = 21, colW: CGFloat = 22, headH: CGFloat = 24, box: CGFloat = 14
     let taskRight = W - margin - 8 * colW
     let rowH = (bottom - top - headH) / CGFloat(rows)
