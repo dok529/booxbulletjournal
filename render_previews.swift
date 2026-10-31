@@ -19,6 +19,7 @@ func firstLine(_ i: Int) -> String {
 func find(_ match: (String) -> Bool) -> Int? { (0..<doc.pageCount).first { match(firstLine($0)) } }
 
 let types: [(file: String, page: Int?)] = [
+    ("deckblatt", find { $0.hasPrefix("BULLET") }),
     ("index", find { $0.hasPrefix("INDEX") }),
     ("future-log", find { $0.hasPrefix("FUTURELOG") }),
     ("monat", find { l in monthNames.contains { l.hasPrefix($0 + "20") } }),

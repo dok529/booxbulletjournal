@@ -220,6 +220,36 @@ func dots(_ ctx: CGContext, x0: CGFloat, y0: CGFloat, x1: CGFloat, y1: CGFloat) 
     } }
 }
 
+// 0) Deckblatt: Titel + Zeitraum, unten alle Monate nach Jahren als Links
+func drawCover(_ ctx: CGContext) {
+    let f = font("AvenirNext-Regular", 40)
+    drawText(ctx, line("BULLET", f, black, kern: 4), x: margin, yMid: 90, f: f)
+    drawText(ctx, line("JOURNAL", f, black, kern: 4), x: margin, yMid: 140, f: f)
+    ctx.setStrokeColor(dark); ctx.setLineWidth(0.6)
+    strokeLine(ctx, margin, 172, W - margin, 172)
+    let first = months[0], last = months[months.count - 1]
+    let pf = font("AvenirNext-Medium", 10)
+    let period = "\(monthNames[first.month - 1]) \(first.year) – \(monthNames[last.month - 1]) \(last.year)"
+    drawText(ctx, line(period, pf, dark, kern: 2.5), x: margin, yMid: 190, f: pf)
+
+    // Monatsleiste: eine Zeile pro Jahr, Monate an fester Position Jan–Dez
+    let years = Array(Set(months.map { $0.year })).sorted()
+    let bf = font("AvenirNext-DemiBold", 7.5)
+    let gap: CGFloat = 4, bw = (W - 2 * margin - 11 * gap) / 12, bh: CGFloat = 18
+    var y = H - margin - CGFloat(years.count) * 40 + 8
+    for yr in years {
+        label(ctx, String(yr), x: margin, yMid: y - 10)
+        for (i, mo) in months.enumerated() where mo.year == yr {
+            let r = rect(margin + CGFloat(mo.month - 1) * (bw + gap), y, bw, bh)
+            ctx.setFillColor(dark)
+            pill(ctx, r, radius: 3)
+            drawCentered(ctx, String(monthNames[mo.month - 1].prefix(3)), f: bf, color: white, cx: r.midX, yMid: y + bh / 2, kern: 0.8)
+            link(r, to: monthPage(i))
+        }
+        y += 40
+    }
+}
+
 // 1) Index: zwei Spalten mit Thema + Seiten
 func drawIndex(_ ctx: CGContext) {
     pageTitle(ctx, "INDEX")
@@ -459,12 +489,14 @@ while (y, m) <= (endYear, endMonth) {
     (y, m) = m == 12 ? (y + 1, 1) : (y, m + 1)
 }
 
-// Seitenaufteilung (0-basiert), wie im Buch: Index, Future Log, Monate, danach die undatierten Vorlagen
-let indexPage = 0
+// Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
+// danach die undatierten Vorlagen
+let indexPage = 1
 let futureCount = (months.count + 2) / 3
-func futurePage(forMonth i: Int) -> Int { 1 + i / 3 }
-func monthPage(_ i: Int) -> Int { 1 + futureCount + i }
+func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
+func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
 
+page(drawCover)
 page(drawIndex)
 for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }

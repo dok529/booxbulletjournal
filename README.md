@@ -4,7 +4,7 @@ Vorlagen-PDF für ein Bullet Journal auf dem BOOX-Reader, Aufbau nach Ryder
 Carrolls Bullet-Journal-Methode. Das PDF in der Notes-App öffnen (nicht als
 Vorlage importieren); weitere Seiten mit „Page+“ einfügen.
 
-Navigation über PDF-Links: Index (mit vorbelegten Einträgen für Future Log und
+Navigation über PDF-Links: Deckblatt-Monatsleiste → Monat, Index (mit vorbelegten Einträgen für Future Log und
 alle Monate) ↔ Future Log, Future-Log-Monatsbalken → Monat, Monatsseiten mit ‹ ›
 sowie FUTURE LOG und INDEX, Daily → FUTURE LOG und INDEX, Woche/Tracker → INDEX.
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
@@ -14,22 +14,25 @@ In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
 
 | Seiten | Inhalt |
 |---|---|
-| 1 | Index (Thema / Seiten) |
-| 2–6 | Future Log, drei Monate pro Seite |
-| 7–20 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
-| 21 | Wochenseite (Aufgaben, Mo–So, Next) |
-| 22 | Daily / Collection (Punktraster) |
-| 23 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
+| 1 | Deckblatt mit Zeitraum und Monatsleiste |
+| 2 | Index (Thema / Seiten) |
+| 3–7 | Future Log, drei Monate pro Seite |
+| 8–21 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
+| 22 | Wochenseite (Aufgaben, Mo–So, Next) |
+| 23 | Daily / Collection (Punktraster) |
+| 24 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
 
 Format 458,88 × 597,12 pt (3:4).
 
 ## Vorschau
 
-| Index | Future Log | Monat |
+| Deckblatt | Index | Future Log |
 |:---:|:---:|:---:|
-| <img src="previews/index.png" width="260" alt="Index"> | <img src="previews/future-log.png" width="260" alt="Future Log"> | <img src="previews/monat.png" width="260" alt="Monatsseite"> |
-| **Woche** | **Daily / Collection** | **Gewohnheit** |
-| <img src="previews/woche.png" width="260" alt="Wochenseite"> | <img src="previews/daily.png" width="260" alt="Daily / Collection"> | <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> |
+| <img src="previews/deckblatt.png" width="260" alt="Deckblatt"> | <img src="previews/index.png" width="260" alt="Index"> | <img src="previews/future-log.png" width="260" alt="Future Log"> |
+| **Monat** | **Woche** | **Daily / Collection** |
+| <img src="previews/monat.png" width="260" alt="Monatsseite"> | <img src="previews/woche.png" width="260" alt="Wochenseite"> | <img src="previews/daily.png" width="260" alt="Daily / Collection"> |
+| **Gewohnheit** | | |
+| <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> | | |
 
 ## Neu erzeugen
 
