@@ -119,7 +119,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
     var nav: [(label: String, target: Int)] = []
     if i > 0 { nav.append(("‹", monthPage(i - 1))) }
     if i < months.count - 1 { nav.append(("›", monthPage(i + 1))) }
-    nav += [("FUTURE LOG", futurePage(forMonth: i)), ("INDEX", indexPage)]
+    nav += [("FUTURE", futurePage(forMonth: i)), ("INDEX", indexPage)]
     navButtons(ctx, nav)
 
     ctx.setStrokeColor(dark)
@@ -258,7 +258,7 @@ func drawCover(_ ctx: CGContext) {
 // 1) Index: zwei Spalten mit Thema + Seiten
 func drawIndex(_ ctx: CGContext) {
     pageTitle(ctx, "INDEX")
-    navButtons(ctx, [("FUTURE LOG", futurePage(forMonth: 0))])
+    navButtons(ctx, [("FUTURE", futurePage(forMonth: 0))])
     let gap: CGFloat = 16, colW = (cRight - cLeft - gap) / 2, headH: CGFloat = 20
     let rows = 28, rowH = (cBottom - cTop - headH) / CGFloat(rows)
     for c in 0..<2 {
@@ -434,13 +434,21 @@ func monthButtons(_ days: [Date]) -> [(label: String, target: Int)] {
     return result
 }
 
+/// Future-Log-Seite des ersten Monats im Zeitraum, den die Woche berührt
+func futurePage(forWeek days: [Date]) -> Int {
+    let mi = days.lazy.compactMap { d in
+        months.firstIndex { $0 == (cal.component(.year, from: d), cal.component(.month, from: d)) }
+    }.first ?? 0
+    return futurePage(forMonth: mi)
+}
+
 func drawWeekDaily(_ ctx: CGContext, index wi: Int) {
     let monday = weeks[wi]
     let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: monday)! }
     let tf = font("AvenirNext-Regular", 15)
     drawText(ctx, line(weekRange(days), tf, black, kern: 1), x: margin, yMid: headMid, f: tf)
     let nav = [("KW \(cal.component(.weekOfYear, from: monday))", weekPage(wi))] + monthButtons(days)
-        + [("FUTURE LOG", futurePage(forMonth: 0)), ("INDEX", indexPage)]
+        + [("FUTURE", futurePage(forWeek: days)), ("INDEX", indexPage)]
     navButtons(ctx, nav, minWidth: 34)
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
@@ -459,15 +467,15 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     let title = line("KW \(cal.component(.weekOfYear, from: monday))", titleFont, black, kern: 1.5)
     drawText(ctx, title, x: margin, yMid: headMid, f: titleFont)
     let range = weekRange(days)
-    let rf = font("AvenirNext-Medium", 9)
-    drawText(ctx, line(range, rf, dark, kern: 1), x: margin + width(title) + 10, yMid: headMid + 1, f: rf)
+    let rf = font("AvenirNext-Medium", 8.5)
+    drawText(ctx, line(range, rf, dark, kern: 0.5), x: margin + width(title) + 8, yMid: headMid + 1, f: rf)
 
     var nav: [(label: String, target: Int)] = []
     if wi > 0 { nav.append(("‹", weekPage(wi - 1))) }
     if wi < weeks.count - 1 { nav.append(("›", weekPage(wi + 1))) }
     nav += monthButtons(days)
-    nav.append(("INDEX", indexPage))
-    navButtons(ctx, nav)
+    nav += [("FUTURE", futurePage(forWeek: days)), ("INDEX", indexPage)]
+    navButtons(ctx, nav, minWidth: 30)
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)

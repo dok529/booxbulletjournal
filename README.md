@@ -9,9 +9,9 @@ Navigation über PDF-Links:
 - Deckblatt: Monatsleiste → Monat
 - Index: vorbelegte Einträge für Future Log, alle Monate, die Wochen und die Gewohnheiten
 - Future Log: Monatsbalken → Monat, INDEX
-- Monat: ‹ › Vor-/Folgemonat, KW-Badges → Woche, FUTURE LOG, INDEX
-- Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, INDEX
-- Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE LOG, INDEX
+- Monat: ‹ › Vor-/Folgemonat, KW-Badges → Woche, FUTURE, INDEX
+- Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, FUTURE, INDEX
+- Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE, INDEX
 - Gewohnheit: KW-Beschriftungen → Woche, INDEX
 - Alle Seiten außer Deckblatt und Gewohnheit: Knopf ✓ unten rechts → Gewohnheitsseite
 
