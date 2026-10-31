@@ -4,7 +4,7 @@
 import AppKit
 import PDFKit
 
-let pdfPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "BuJo-Seiten-2026-11_2027-12.pdf"
+let pdfPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "BuJo-2027 V1.pdf"
 guard let doc = PDFDocument(url: URL(fileURLWithPath: pdfPath)) else { fatalError("Kann \(pdfPath) nicht öffnen") }
 
 let monthNames = ["JANUAR", "FEBRUAR", "MÄRZ", "APRIL", "MAI", "JUNI",
@@ -24,6 +24,7 @@ let types: [(file: String, page: Int?)] = [
     ("future-log", find { $0.hasPrefix("FUTURELOG") }),
     ("monat", find { l in monthNames.contains { l.hasPrefix($0 + "20") } }),
     ("woche", find { $0.hasPrefix("KW") }),
+    ("wochen-daily", find { $0.first?.isNumber == true }),
     ("daily", find { $0.hasPrefix("DATUM/THEMA") }),
     ("gewohnheit", find { $0.hasPrefix("GEWOHNHEIT") }),
 ]

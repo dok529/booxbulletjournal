@@ -15,7 +15,7 @@ let startYear = 2026, startMonth = 11
 let endYear = 2027, endMonth = 12
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "BuJo-Seiten-\(startYear)-\(String(format: "%02d", startMonth))_\(endYear)-\(String(format: "%02d", endMonth)).pdf"
+    : "BuJo-2027 V1.pdf"
 
 // Seitenformat wie der Original-Planer (OnPlanners, vertikal)
 let W: CGFloat = 458.88, H: CGFloat = 597.12
@@ -85,10 +85,10 @@ func link(_ r: CGRect, to target: Int) { links.append((currentPage, r, target)) 
 /// Navigationsknöpfe rechts in der Kopfzeile, von links nach rechts angeordnet.
 /// Gibt den linken Rand des ersten Knopfs zurück.
 @discardableResult
-func navButtons(_ ctx: CGContext, _ items: [(label: String, target: Int)]) -> CGFloat {
+func navButtons(_ ctx: CGContext, _ items: [(label: String, target: Int)], minWidth: CGFloat = 46) -> CGFloat {
     let f = font("AvenirNext-DemiBold", 7.5)
     let h: CGFloat = 17, gap: CGFloat = 5
-    let widths = items.map { $0.label.count <= 1 ? 20 : max(46, width(line($0.label, f, white, kern: 1)) + 16) }
+    let widths = items.map { $0.label.count <= 1 ? 20 : max(minWidth, width(line($0.label, f, white, kern: 1)) + 16) }
     var x = W - margin - widths.reduce(0, +) - gap * CGFloat(items.count - 1)
     let left = x
     for (item, w) in zip(items, widths) {
@@ -406,6 +406,61 @@ func drawTracker(_ ctx: CGContext) {
     }
 }
 
+// MARK: - Gewohnheits-Knopf (unten rechts über dem Inhalt, ohne Text, mit Häkchen)
+
+func habitButton(_ ctx: CGContext) {
+    let s: CGFloat = 20
+    let r = rect(W - margin - s, H - margin - s, s, s)
+    ctx.setFillColor(dark)
+    pill(ctx, r, radius: 4)
+    ctx.saveGState()
+    ctx.setStrokeColor(white); ctx.setLineWidth(1.8); ctx.setLineCap(.round); ctx.setLineJoin(.round)
+    ctx.move(to: CGPoint(x: r.minX + 5.5, y: r.midY + 0.5))
+    ctx.addLine(to: CGPoint(x: r.minX + 8.8, y: r.minY + 6))
+    ctx.addLine(to: CGPoint(x: r.maxX - 5, y: r.maxY - 5.5))
+    ctx.strokePath()
+    ctx.restoreGState()
+    link(r, to: trackerPage)
+}
+
+// MARK: - Wochen-Daily (nach jeder Wochenseite): Datumsbereich als Überschrift, freies Punktraster
+
+func weekRange(_ days: [Date]) -> String {
+    let df = DateFormatter()
+    df.dateFormat = "dd.MM."
+    let yf = DateFormatter()
+    yf.dateFormat = "dd.MM.yyyy"
+    let sameYear = cal.component(.year, from: days[0]) == cal.component(.year, from: days[6])
+    return "\((sameYear ? df : yf).string(from: days[0])) – \(yf.string(from: days[6]))"
+}
+
+/// Monate des Zeitraums, die eine Woche berührt, als Navigationsknöpfe
+func monthButtons(_ days: [Date]) -> [(label: String, target: Int)] {
+    var result: [(label: String, target: Int)] = []
+    var seen = Set<Int>()
+    for d in days {
+        let ym = (cal.component(.year, from: d), cal.component(.month, from: d))
+        if let mi = months.firstIndex(where: { $0 == ym }), seen.insert(mi).inserted {
+            result.append((String(monthNames[ym.1 - 1].prefix(3)), monthPage(mi)))
+        }
+    }
+    return result
+}
+
+func drawWeekDaily(_ ctx: CGContext, index wi: Int) {
+    let monday = weeks[wi]
+    let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: monday)! }
+    let tf = font("AvenirNext-Regular", 15)
+    drawText(ctx, line(weekRange(days), tf, black, kern: 1), x: margin, yMid: headMid, f: tf)
+    let nav = [("KW \(cal.component(.weekOfYear, from: monday))", weekPage(wi))] + monthButtons(days)
+        + [("FUTURE LOG", futurePage(forMonth: 0)), ("INDEX", indexPage)]
+    navButtons(ctx, nav, minWidth: 34)
+    ctx.setStrokeColor(dark)
+    ctx.setLineWidth(0.6)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
+    dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
+}
+
 // MARK: - Wochenseite (Aufbau wie "Weekly Rolling.pdf": Aufgaben + Mo–So + Next, Stil wie Monatsseite)
 
 func drawWeek(_ ctx: CGContext, index wi: Int) {
@@ -416,25 +471,14 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     let titleFont = font("AvenirNext-Regular", 18)
     let title = line("KW \(cal.component(.weekOfYear, from: monday))", titleFont, black, kern: 1.5)
     drawText(ctx, title, x: margin, yMid: headMid, f: titleFont)
-    let df = DateFormatter()
-    df.dateFormat = "dd.MM."
-    let yf = DateFormatter()
-    yf.dateFormat = "dd.MM.yyyy"
-    let sameYear = cal.component(.year, from: days[0]) == cal.component(.year, from: days[6])
-    let range = "\((sameYear ? df : yf).string(from: days[0])) – \(yf.string(from: days[6]))"
+    let range = weekRange(days)
     let rf = font("AvenirNext-Medium", 9)
     drawText(ctx, line(range, rf, dark, kern: 1), x: margin + width(title) + 10, yMid: headMid + 1, f: rf)
 
     var nav: [(label: String, target: Int)] = []
     if wi > 0 { nav.append(("‹", weekPage(wi - 1))) }
     if wi < weeks.count - 1 { nav.append(("›", weekPage(wi + 1))) }
-    var seen = Set<Int>()
-    for d in days {
-        let ym = (cal.component(.year, from: d), cal.component(.month, from: d))
-        if let mi = months.firstIndex(where: { $0 == ym }), seen.insert(mi).inserted {
-            nav.append((String(monthNames[ym.1 - 1].prefix(3)), monthPage(mi)))
-        }
-    }
+    nav += monthButtons(days)
     nav.append(("INDEX", indexPage))
     navButtons(ctx, nav)
     ctx.setStrokeColor(dark)
@@ -492,11 +536,12 @@ guard let ctx = CGContext(URL(fileURLWithPath: output) as CFURL, mediaBox: &medi
     fatalError("Kann \(output) nicht anlegen")
 }
 
-func page(_ draw: (CGContext) -> Void) {
+func page(habit: Bool = true, _ draw: (CGContext) -> Void) {
     ctx.beginPDFPage(nil)
     ctx.setFillColor(white)
     ctx.fill(mediaBox)
     draw(ctx)
+    if habit { habitButton(ctx) }
     ctx.endPDFPage()
     currentPage += 1
 }
@@ -522,19 +567,24 @@ while w <= lastDay {
 func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
 
 // Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
-// danach alle Wochen und die undatierten Vorlagen
+// danach alle Wochen (je Wochenseite + Wochen-Daily) und die undatierten Vorlagen
 let indexPage = 1
 let futureCount = (months.count + 2) / 3
 func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
 func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
-func weekPage(_ i: Int) -> Int { monthPage(months.count) + i }
+func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
+let trackerPage = weekPage(weeks.count) + 1
 
-page(drawCover)
+page(habit: false, drawCover)
 page(drawIndex)
 for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }
-for i in weeks.indices { page { drawWeek($0, index: i) } }
-for draw in [drawDaily, drawTracker] { page(draw) }
+for i in weeks.indices {
+    page { drawWeek($0, index: i) }
+    page { drawWeekDaily($0, index: i) }
+}
+page(drawDaily)
+page(habit: false, drawTracker)
 ctx.closePDF()
 
 // Links als GoTo-Annotationen mit explizitem Seitenziel einfügen
