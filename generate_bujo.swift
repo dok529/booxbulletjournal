@@ -1,4 +1,4 @@
-// Erzeugt ein Bullet-Journal-PDF für BOOX Notes: Deckblatt, Index, Future Log,
+// Erzeugt ein Bullet-Journal-PDF für BOOX Notes: Deckblatt, Index, Regelseite, Future Log,
 // Monatsseiten (Tagesliste + Punktraster), Wochen mit Wochen-Daily und Gewohnheitsseite.
 // Navigationsknöpfe sind echte PDF-Links mit festen Seitenzielen; BOOX Notes
 // passt sie an, wenn auf dem Gerät Seiten eingefügt werden.
@@ -15,7 +15,7 @@ let startYear = 2026, startMonth = 11
 let endYear = 2027, endMonth = 12
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "BuJo-2027 V2.pdf"
+    : "BuJo-2027 V2.1.pdf"
 
 // Seitenformat wie der Original-Planer (OnPlanners, vertikal)
 let W: CGFloat = 458.88, H: CGFloat = 597.12
@@ -274,9 +274,9 @@ func drawIndex(_ ctx: CGContext) {
         strokeLine(ctx, x + colW - 44, cTop + headH, x + colW - 44, cBottom)
     }
 
-    // Vorbelegt: Future Log und alle Monate als Links. Ohne Seitenzahl, weil sich die
+    // Vorbelegt: Regeln, Future Log und alle Monate als Links. Ohne Seitenzahl, weil sich die
     // Seitenzahlen auf dem BOOX durch eingefügte Seiten verschieben.
-    let entries = [("Future Log", futurePage(forMonth: 0))]
+    let entries = [("Regeln", rulesPage), ("Future Log", futurePage(forMonth: 0))]
         + months.indices.map { ("\(monthNames[months[$0].month - 1].capitalized) \(months[$0].year)", monthPage($0)) }
         + [("Wochen (ab KW \(cal.component(.weekOfYear, from: weeks[0])))", weekPage(0)),
            ("Gewohnheiten", trackerPage), ("Collections", collectionPage)]
@@ -533,6 +533,120 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     }
 }
 
+// MARK: - Regelseite (nach dem Index): Bullets, was wohin, Migrationsrhythmus, Faustregeln
+
+func textAttrs(_ f: CTFont, _ color: CGColor) -> [NSAttributedString.Key: Any] {
+    [NSAttributedString.Key(kCTFontAttributeName as String): f,
+     NSAttributedString.Key(kCTForegroundColorAttributeName as String): color]
+}
+
+/// Absatz mit **fett**-Markierung, umbrochen auf `w`; gibt die Höhe zurück.
+@discardableResult
+func paragraph(_ ctx: CGContext, _ text: String, x: CGFloat, y: CGFloat, w: CGFloat) -> CGFloat {
+    let regular = font("AvenirNext-Regular", 8), bold = font("AvenirNext-DemiBold", 8)
+    let s = NSMutableAttributedString()
+    for (i, part) in text.components(separatedBy: "**").enumerated() {
+        s.append(NSAttributedString(string: part, attributes: textAttrs(i % 2 == 1 ? bold : regular, dark)))
+    }
+    var lineHeight: CGFloat = 10.5
+    let style = withUnsafePointer(to: &lineHeight) {
+        CTParagraphStyleCreate([CTParagraphStyleSetting(spec: .minimumLineHeight, valueSize: MemoryLayout<CGFloat>.size, value: $0)], 1)
+    }
+    s.addAttribute(NSAttributedString.Key(kCTParagraphStyleAttributeName as String), value: style, range: NSRange(location: 0, length: s.length))
+    let fs = CTFramesetterCreateWithAttributedString(s)
+    let h = ceil(CTFramesetterSuggestFrameSizeWithConstraints(fs, CFRange(), nil, CGSize(width: w, height: .greatestFiniteMagnitude), nil).height)
+    CTFrameDraw(CTFramesetterCreateFrame(fs, CFRange(), CGPath(rect: rect(x, y, w, h), transform: nil), nil), ctx)
+    return h
+}
+
+/// Abschnittskopf (Versalien, gesperrt) mit Linie; gibt den Beginn des Inhalts zurück.
+func section(_ ctx: CGContext, _ title: String, y: CGFloat) -> CGFloat {
+    label(ctx, title, x: cLeft, yMid: y + 5)
+    ctx.setStrokeColor(dark); ctx.setLineWidth(0.5)
+    strokeLine(ctx, cLeft, y + 12, cRight, y + 12)
+    return y + 18
+}
+
+/// Zeile mit dunklem Etikett links und umbrochenem Text rechts; gibt die Zeilenhöhe zurück.
+func labelRow(_ ctx: CGContext, _ name: String, _ text: String, y: CGFloat) -> CGFloat {
+    let labelW: CGFloat = 78, tx = cLeft + labelW + 8, tw = cRight - tx - 4
+    ctx.setFillColor(dark)
+    pill(ctx, rect(cLeft, y, labelW, 13), radius: 3)
+    drawCentered(ctx, name, f: font("AvenirNext-DemiBold", 7), color: white, cx: cLeft + labelW / 2, yMid: y + 6.5, kern: 1)
+    return max(14, paragraph(ctx, text, x: tx, y: y + 0.5, w: tw))
+}
+
+func drawRules(_ ctx: CGContext) {
+    pageTitle(ctx, "REGELN")
+    navButtons(ctx, [("FUTURE", futurePage(forMonth: 0)), ("INDEX", indexPage)])
+
+    // Bullets: zwei Spalten, Symbol + Bedeutung
+    var y = section(ctx, "BULLETS", y: cTop + 2)
+    let bullets: [[(String, String)]] = [
+        [("•", "**Aufgabe**"), ("/", "**angefangen**; zweiter Strich macht daraus ×"), ("×", "**erledigt**"), (">", "**migriert**: nächste Woche oder Collection"),
+         ("<", "**zurückgestellt**: Monatsseite oder Future Log"),
+         ("@", "**wartet** auf jemanden, delegiert (@Name)")],
+        [("○", "**Termin**, Ereignis"), ("–", "**Notiz**, Gedanke, Beobachtung"), ("*", "**wichtig** (vor das Bullet)"),
+         ("!", "**Idee**, Inspiration (vor das Bullet)"),
+         ("?", "**zu klären**, recherchieren (vor das Bullet)")],
+    ]
+    let symFont = font("AvenirNext-Medium", 13)
+    let colW = (cRight - cLeft) / 2, rowH: CGFloat = 14
+    for (c, col) in bullets.enumerated() {
+        for (r, (sym, text)) in col.enumerated() {
+            let x = cLeft + CGFloat(c) * colW, yy = y + CGFloat(r) * rowH
+            drawCentered(ctx, sym, f: symFont, color: dark, cx: x + 7, yMid: yy + 6.5)
+            paragraph(ctx, text, x: x + 20, y: yy + 1, w: colW - 26)
+        }
+    }
+    y += CGFloat(bullets.map(\.count).max()!) * rowH + 2
+    y += paragraph(ctx, "Aufgabe **durchgestrichen** = hinfällig.",
+                   x: cLeft, y: y, w: cRight - cLeft) + 10
+
+    // Was wohin: vom Langfristigen zum Heute
+    y = section(ctx, "WAS WOHIN", y: y)
+    let places: [(String, String)] = [
+        ("FUTURE LOG", "Termine, Fristen und Vorhaben **ab dem nächsten Monat**, unter den Monat; mit Datum, wenn es eins gibt. "
+            + "Auch **aktive Collections mit Aufgaben** unter dem Monat vermerken."),
+        ("MONAT", "**Die Monatsseite ist das Future Log der Wochen.** Links an den Tag: Termine und Fristen dieses Monats, "
+            + "auch was erst in zwei Wochen dran ist. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen. "
+            + "Rechts unten: konkrete Aufgaben des Monats. **Aktive Collections mit Aufgaben** hier vermerken."),
+        ("WOCHE", "Aufgaben und Termine **dieser Woche**, per Kästchen auf Tage verteilt. **Ausgefülltes Kästchen** = Ereignis, "
+            + "das andere Aktivitäten blockieren kann. **Nx** = Aktivitäten, die sich in der Folgewoche fortsetzen."),
+        ("DAILY", "Tageslog: Datum als Überschrift, dann schnell und kurz mit Bullets notieren. Gedanken dürfen hierher."),
+        ("COLLECTION", "Alles **ohne Datum**: Ideen, Listen, Projekte, Recherchen. Neue Collection sofort in den Index eintragen."),
+        ("GEWOHNHEIT", "Was sich **regelmäßig wiederholt**: eine Seite pro Gewohnheit, täglich abhaken."),
+        ("INDEX", "Neue Collections und Seiten, die du wiederfinden willst, mit Link-Symbol eintragen."),
+    ]
+    for (name, text) in places { y += labelRow(ctx, name, text, y: y) + 5 }
+    y += 3
+
+    // Rhythmus der Migration
+    y = section(ctx, "RHYTHMUS", y: y)
+    let rhythm: [(String, String)] = [
+        ("TÄGLICH", "Morgens die Daily datieren, über den Tag mitloggen. Abends abhaken: × oder in der Woche weiterplanen."),
+        ("WÖCHENTLICH", "Jede offene • der Woche: **>** in die neue Woche oder eine Collection, **<** zurück auf Monat / Future Log, oder streichen. "
+            + "Dann auf der **Monatsseite** nachsehen, was in die neue Woche fällt, und übertragen. Neue Daily kopieren."),
+        ("MONATLICH", "**Future Log** des neuen Monats auf die Monatsseite übertragen. Offene Themen des alten Monats migrieren oder streichen."),
+    ]
+    for (name, text) in rhythm { y += labelRow(ctx, name, text, y: y) + 5 }
+    y += 3
+
+    // Faustregeln als Frage → Ziel
+    y = section(ctx, "FAUSTREGELN", y: y)
+    let rules = [("Erst im nächsten Monat oder später?", "Future Log"), ("Diesen Monat, aber nicht diese Woche?", "Monatsseite"),
+                 ("Diese Woche?", "Wochenseite"), ("Kein Datum?", "Collection"), ("Wiederholt sich?", "Gewohnheit")]
+    let qf = font("AvenirNext-Regular", 8), af = font("AvenirNext-DemiBold", 8)
+    for (i, (q, a)) in rules.enumerated() {
+        let x = cLeft + CGFloat(i % 2) * colW, yy = y + CGFloat(i / 2) * 13
+        let ql = line(q, qf, dark)
+        drawText(ctx, ql, x: x, yMid: yy + 5, f: qf)
+        drawText(ctx, line("→ " + a, af, dark), x: x + width(ql) + 5, yMid: yy + 5, f: af)
+    }
+    y += 3 * 13 + 2
+    paragraph(ctx, "Migrieren ist ein Filter: Was das Abschreiben nicht wert ist, wird gestrichen.", x: cLeft, y: y, w: cRight - cLeft)
+}
+
 // MARK: - PDF schreiben
 
 var mediaBox = CGRect(x: 0, y: 0, width: W, height: H)
@@ -571,18 +685,20 @@ while w <= lastDay {
 }
 func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
 
-// Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
+// Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Regeln, Future Log, Monate,
 // danach alle Wochen (je Wochenseite + Wochen-Daily), die Gewohnheitsseite und zwei Collections
 let indexPage = 1
+let rulesPage = indexPage + 1
 let futureCount = (months.count + 2) / 3
-func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
-func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
+func futurePage(forMonth i: Int) -> Int { rulesPage + 1 + i / 3 }
+func monthPage(_ i: Int) -> Int { rulesPage + 1 + futureCount + i }
 func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
 let trackerPage = weekPage(weeks.count)
 let collectionPage = trackerPage + 1
 
 page(habit: false, drawCover)
 page(drawIndex)
+page(habit: false, drawRules)
 for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }
 for i in weeks.indices {
