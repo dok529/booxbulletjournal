@@ -572,12 +572,12 @@ while w <= lastDay {
 func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
 
 // Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
-// danach alle Wochen (je Wochenseite + zwei Wochen-Dailys), die Gewohnheitsseite und zwei Collections
+// danach alle Wochen (je Wochenseite + Wochen-Daily), die Gewohnheitsseite und zwei Collections
 let indexPage = 1
 let futureCount = (months.count + 2) / 3
 func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
 func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
-func weekPage(_ i: Int) -> Int { monthPage(months.count) + 3 * i }
+func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
 let trackerPage = weekPage(weeks.count)
 let collectionPage = trackerPage + 1
 
@@ -587,7 +587,6 @@ for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }
 for i in weeks.indices {
     page { drawWeek($0, index: i) }
-    page { drawWeekDaily($0, index: i) }
     page { drawWeekDaily($0, index: i) }
 }
 page(habit: false, drawTracker)

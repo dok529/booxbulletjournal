@@ -5,10 +5,9 @@ Carrolls Bullet-Journal-Methode. Das PDF in der Notes-App öffnen (nicht als
 Vorlage importieren).
 
 Zusätzliche Seiten nicht über „Page+“ einfügen, sondern in der
-Seitenübersicht kopieren: Nach jeder Wochenseite folgen zwei Wochen-Dailys.
-Bevor die letzte freie Daily der Woche beschrieben wird, diese Daily in der
-Seitenübersicht kopieren. So liegt immer eine leere Daily mit allen Links
-bereit. Genauso eine Gewohnheitsseite pro Gewohnheit und weitere
+Seitenübersicht kopieren: Nach jeder Wochenseite folgt eine Wochen-Daily.
+Bevor sie beschrieben wird, diese Daily in der Seitenübersicht kopieren. So
+liegt immer eine leere Daily mit allen Links bereit. Genauso eine Gewohnheitsseite pro Gewohnheit und weitere
 Collections kopieren.
 
 Navigation über PDF-Links:
@@ -34,9 +33,9 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 2 | Index (Thema / Seiten) |
 | 3–7 | Future Log, drei Monate pro Seite |
 | 8–21 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
-| 22–207 | KW 44/2026 – KW 52/2027, je drei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und zwei Wochen-Dailys (Datumsbereich, Punktraster) |
-| 208 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
-| 209–210 | Collections: leere Schreiblinie für das Thema, Punktraster |
+| 22–145 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
+| 146 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
+| 147–148 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
 Format 458,88 × 597,12 pt (3:4).
 
