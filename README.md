@@ -2,7 +2,13 @@
 
 Vorlagen-PDF für ein Bullet Journal auf dem BOOX-Reader, Aufbau nach Ryder
 Carrolls Bullet-Journal-Methode. Das PDF in der Notes-App öffnen (nicht als
-Vorlage importieren); weitere Seiten mit „Page+“ einfügen.
+Vorlage importieren).
+
+Zusätzliche Seiten nicht über „Page+“ einfügen, sondern in der
+Seitenübersicht kopieren: Nach jeder Wochenseite folgen zwei Wochen-Dailys.
+Bevor die letzte freie Daily der Woche beschrieben wird, diese Daily in der
+Seitenübersicht kopieren. So liegt immer eine leere Daily mit allen Links
+bereit. Genauso eine Gewohnheitsseite pro Gewohnheit kopieren.
 
 Navigation über PDF-Links:
 
@@ -15,8 +21,8 @@ Navigation über PDF-Links:
 - Gewohnheit: KW-Beschriftungen → Woche, INDEX
 - Alle Seiten außer Deckblatt und Gewohnheit: Knopf ✓ unten rechts → Gewohnheitsseite
 
-In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
-(getestet).
+In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt oder
+kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 
 ## Inhalt von `BuJo-2027 V1.pdf`
 
@@ -26,8 +32,8 @@ In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt werden
 | 2 | Index (Thema / Seiten) |
 | 3–7 | Future Log, drei Monate pro Seite |
 | 8–21 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
-| 22–145 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
-| 146 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
+| 22–207 | KW 44/2026 – KW 52/2027, je drei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und zwei Wochen-Dailys (Datumsbereich, Punktraster) |
+| 208 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
 
 Format 458,88 × 597,12 pt (3:4).
 

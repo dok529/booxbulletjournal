@@ -567,7 +567,7 @@ let indexPage = 1
 let futureCount = (months.count + 2) / 3
 func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
 func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
-func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
+func weekPage(_ i: Int) -> Int { monthPage(months.count) + 3 * i }
 let trackerPage = weekPage(weeks.count)
 
 page(habit: false, drawCover)
@@ -576,6 +576,7 @@ for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }
 for i in weeks.indices {
     page { drawWeek($0, index: i) }
+    page { drawWeekDaily($0, index: i) }
     page { drawWeekDaily($0, index: i) }
 }
 page(habit: false, drawTracker)
