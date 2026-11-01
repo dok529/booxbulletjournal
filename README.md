@@ -63,3 +63,7 @@ Nach jeder Layout-Änderung beide Befehle ausführen und `previews/` mit
 committen, damit die Vorschau aktuell bleibt.
 
 Benötigt nur macOS (CoreGraphics/CoreText), keine weiteren Abhängigkeiten.
+
+## Lizenz
+
+MIT, siehe [LICENSE](LICENSE). Gilt für Skripte und das erzeugte PDF.
