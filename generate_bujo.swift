@@ -29,9 +29,9 @@ let monthNames = ["JANUAR", "FEBRUAR", "MÄRZ", "APRIL", "MAI", "JUNI",
                   "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DEZEMBER"]
 let weekdayShort = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"] // Index = Calendar.weekday - 1
 
-let dark = CGColor(gray: 0.30, alpha: 1)
-let light = CGColor(gray: 0.92, alpha: 1)
-let rule = CGColor(gray: 0.55, alpha: 1)
+let dark = CGColor(gray: 0, alpha: 1)
+let light = CGColor(gray: 0.91, alpha: 1)
+let rule = CGColor(gray: 0, alpha: 1)
 let black = CGColor(gray: 0, alpha: 1)
 let white = CGColor(gray: 1, alpha: 1)
 
@@ -181,7 +181,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
     let cols = Int((gridX1 - gridX0) / dotSpacing), rows = Int((bottom - top) / dotSpacing)
     let offX = gridX0 + ((gridX1 - gridX0) - CGFloat(cols) * dotSpacing) / 2
     let offY = top + ((bottom - top) - CGFloat(rows) * dotSpacing) / 2
-    ctx.setFillColor(CGColor(gray: 0.4, alpha: 1))
+    ctx.setFillColor(gridDot)
     let r: CGFloat = 0.65
     for i in 0...cols {
         for j in 0...rows {
@@ -194,7 +194,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
 // MARK: - Weitere Seiten: Deckblatt, Index, Future Log, Gewohnheits-Tracker
 
 let cTop = contentTop, cBottom = H - margin, cLeft = margin, cRight = W - margin
-let gridDot = CGColor(gray: 0.4, alpha: 1)
+let gridDot = CGColor(gray: 0, alpha: 1)
 
 func pageTitle(_ ctx: CGContext, _ title: String, writeLine: CGFloat = 0) {
     let f = font("AvenirNext-Regular", 18)
@@ -378,7 +378,7 @@ func drawTracker(_ ctx: CGContext) {
                     strokeLine(ctx, cell.minX, y, x0 + 7 * cw, y)
                     if k > 0 { strokeLine(ctx, x0, y + rh, cell.minX, y + rh) }
                 } else {
-                    drawText(ctx, line(String(dn), nf, CGColor(gray: 0.35, alpha: 1)), x: cell.minX + 1.5, yMid: y + 3.8, f: nf)
+                    drawText(ctx, line(String(dn), nf, black), x: cell.minX + 1.5, yMid: y + 3.8, f: nf)
                 }
             }
             ctx.setStrokeColor(rule); ctx.setLineWidth(0.4)
