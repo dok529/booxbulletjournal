@@ -26,6 +26,7 @@ let types: [(file: String, page: Int?)] = [
     ("woche", find { $0.hasPrefix("KW") }),
     ("wochen-daily", find { $0.first?.isNumber == true }),
     ("gewohnheit", find { $0.hasPrefix("GEWOHNHEIT") }),
+    ("collection", find { $0.hasPrefix("FUTUREINDEX") }),
 ]
 
 let scale: CGFloat = 1.5

@@ -279,7 +279,7 @@ func drawIndex(_ ctx: CGContext) {
     let entries = [("Future Log", futurePage(forMonth: 0))]
         + months.indices.map { ("\(monthNames[months[$0].month - 1].capitalized) \(months[$0].year)", monthPage($0)) }
         + [("Wochen (ab KW \(cal.component(.weekOfYear, from: weeks[0])))", weekPage(0)),
-           ("Gewohnheiten", trackerPage)]
+           ("Gewohnheiten", trackerPage), ("Collections", collectionPage)]
     let ef = font("AvenirNext-Regular", 9.5)
     for (r, (text, target)) in entries.prefix(rows).enumerated() {
         let rowTop = cTop + headH + CGFloat(r) * rowH
@@ -456,6 +456,16 @@ func drawWeekDaily(_ ctx: CGContext, index wi: Int) {
     dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
 }
 
+// Collection: leere Schreiblinie für das Thema, Punktraster über die ganze Seite
+func drawCollection(_ ctx: CGContext) {
+    let navLeft = navButtons(ctx, [("FUTURE", futurePage(forMonth: 0)), ("INDEX", indexPage)])
+    ctx.setStrokeColor(rule); ctx.setLineWidth(0.6)
+    strokeLine(ctx, margin, headMid + 8, navLeft - 16, headMid + 8)
+    ctx.setStrokeColor(dark); ctx.setLineWidth(0.6)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
+    dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
+}
+
 // MARK: - Wochenseite (Aufbau wie "Weekly Rolling.pdf": Aufgaben + Mo–So + Next, Stil wie Monatsseite)
 
 func drawWeek(_ ctx: CGContext, index wi: Int) {
@@ -562,13 +572,14 @@ while w <= lastDay {
 func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
 
 // Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Future Log, Monate,
-// danach alle Wochen (je Wochenseite + Wochen-Daily) und die Gewohnheitsseite
+// danach alle Wochen (je Wochenseite + zwei Wochen-Dailys), die Gewohnheitsseite und zwei Collections
 let indexPage = 1
 let futureCount = (months.count + 2) / 3
 func futurePage(forMonth i: Int) -> Int { indexPage + 1 + i / 3 }
 func monthPage(_ i: Int) -> Int { indexPage + 1 + futureCount + i }
 func weekPage(_ i: Int) -> Int { monthPage(months.count) + 3 * i }
 let trackerPage = weekPage(weeks.count)
+let collectionPage = trackerPage + 1
 
 page(habit: false, drawCover)
 page(drawIndex)
@@ -580,6 +591,8 @@ for i in weeks.indices {
     page { drawWeekDaily($0, index: i) }
 }
 page(habit: false, drawTracker)
+page(drawCollection)
+page(drawCollection)
 ctx.closePDF()
 
 // Links als GoTo-Annotationen mit explizitem Seitenziel einfügen
