@@ -15,7 +15,7 @@ let startYear = 2026, startMonth = 11
 let endYear = 2027, endMonth = 12
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "BuJo-2027 V1.pdf"
+    : "BuJo-2027 V2.pdf"
 
 // Seitenformat wie der Original-Planer (OnPlanners, vertikal)
 let W: CGFloat = 458.88, H: CGFloat = 597.12

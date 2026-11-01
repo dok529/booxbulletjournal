@@ -4,7 +4,7 @@
 import AppKit
 import PDFKit
 
-let pdfPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "BuJo-2027 V1.pdf"
+let pdfPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "BuJo-2027 V2.pdf"
 guard let doc = PDFDocument(url: URL(fileURLWithPath: pdfPath)) else { fatalError("Kann \(pdfPath) nicht öffnen") }
 
 let monthNames = ["JANUAR", "FEBRUAR", "MÄRZ", "APRIL", "MAI", "JUNI",
