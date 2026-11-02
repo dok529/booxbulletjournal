@@ -10,7 +10,7 @@ ZIP mit einem Ordner `<Dokument-UUID>/`, Verzeichniseinträge unkomprimiert, Dat
 |---|---|
 | `note/pb/note_info` | Protobuf, ein Feld 1 mit der Dokument-Nachricht (siehe unten) |
 | `virtual/page/pb/<id>` | eine Nachricht je Seite: Seite ↔ PDF-Seite |
-| `pageModel/pb/<id>` | eine Nachricht je Seite (Ebenen, Größe 1860×2480) plus eine mit der Dokument-UUID |
+| `pageModel/pb/<id>` | eine Nachricht je Seite (2 Ebenen-JSON, 3 aktuelle Ebene, 4 Seitenname, 7 Seitenrechteck) plus eine mit der Dokument-UUID. Ebenen und Name müssen je Seite erhalten bleiben: Striche auf einer Ebene, die die Seite nicht hat, zeigt das Gerät nicht an |
 | `virtual/doc/pb/<Dokument-UUID>` | Dokumentansicht; Feld 4 = aktuelle Seite, Feld 9 = Vorlage für neue leere Seiten |
 | `extra/pb/extra` | Feld 4 = Dokument-UUID |
 | `resource/content/<Name>.pdf` | das Vorlagen-PDF |
@@ -22,7 +22,7 @@ ZIP mit einem Ordner `<Dokument-UUID>/`, Verzeichniseinträge unkomprimiert, Dat
 
 ## note_info (Felder der inneren Nachricht)
 
-1 Dokument-UUID · 2/3 erstellt/geändert (ms) · 6 Titel · 12 JSON mit `pageInfoMap` (je Seiten-ID: Ebenen, 1860×2480) · 14 JSON mit Gerät und Größe · 19 zuletzt geöffnete Seite (0-basiert) · 20 JSON `{"pageNameList": [...]}` = Seitenreihenfolge. Felder 28, 32, 39 sind unbekannt und werden unverändert übernommen.
+1 Dokument-UUID · 2/3 erstellt/geändert (ms) · 6 Titel · 12 JSON mit `pageInfoMap` (je Seiten-ID: `layerList`, `currentLayerId`, optional `title` = Seitenname, Breite/Höhe; leere Seiten 1860×2480, PDF-Seiten 2100×2732) · 14 JSON mit Gerät und Größe · 19 zuletzt geöffnete Seite (0-basiert) · 20 JSON `{"pageNameList": [...]}` = Seitenreihenfolge. Felder 28, 32, 39 sind unbekannt und werden unverändert übernommen.
 
 ## virtual/page (je Seite)
 
@@ -30,7 +30,7 @@ ZIP mit einem Ordner `<Dokument-UUID>/`, Verzeichniseinträge unkomprimiert, Dat
 
 ## Shapes (je Eintrag in der Shape-Liste)
 
-1 Shape-ID · 2/3 Zeitstempel · 5 float32 Stiftbreite · 7 JSON-Begrenzungsrechteck (nach Matrix) · 8 optional JSON `{"values": [a,b,c,d,e,f,0,0,1]}` (Android-Matrix: x' = a·x + b·y + c, y' = d·x + e·y + f) für verschobene/skalierte Shapes · 10 optional Link: JSON mit `docBean` (documentId, pageId, pageIndex 0-basiert, title, path) · 11 JSON Stiftparameter · 12 Typ (22 Strich, 5 Linie, 2 Kreis, 15 Pfeil/Linie, 33 Link-Symbol, 60 weitere) · 16 Punkte-UUID · 18 Gruppen-UUID (= Mitte des Zip-Namens).
+1 Shape-ID · 2/3 Zeitstempel · 5 float32 Stiftbreite · 6 Ebene (fehlt = 0) · 7 JSON-Begrenzungsrechteck (nach Matrix) · 8 optional JSON `{"values": [a,b,c,d,e,f,0,0,1]}` (Android-Matrix: x' = a·x + b·y + c, y' = d·x + e·y + f) für verschobene/skalierte Shapes · 10 optional Link: JSON mit `docBean` (documentId, pageId, pageIndex 0-basiert, title, path) · 11 JSON Stiftparameter · 12 Typ (22 Strich, 5 Linie, 2 Kreis, 15 Pfeil/Linie, 33 Link-Symbol, 60 weitere) · 16 Punkte-UUID · 18 Gruppen-UUID (= Mitte des Zip-Namens).
 
 ## Punktedatei
 

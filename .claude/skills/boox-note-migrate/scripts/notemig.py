@@ -362,10 +362,14 @@ def cmd_build(a):
                     data[p:p + 8] = struct.pack(">ff", *f(*struct.unpack(">ff", data[p:p + 8])))
             files["point/%s/%s#%s#%s" % (remap[page], remap[page], pts, tail)] = bytes(data)
 
-    # Seitenmodelle
+    # Seitenmodelle: Ebenen, aktuelle Ebene und Seitenname kommen von der Quellseite,
+    # neue Seiten bekommen nur Ebene 0 und keinen Namen. Striche auf einer fehlenden Ebene zeigt das Gerät nicht an.
     vp_tpl = old.vp[tpl_pid]
-    pm_tpl = next(r for r in old.pm if getf(r, 1).decode() != old.doc)
-    pm_doc = next((r for r in old.pm if getf(r, 1).decode() == old.doc), None)
+    old_pm = {getf(r, 1).decode(): r for r in old.pm}
+    pm_doc = old_pm.get(old.doc)
+    layer0 = [{"id": 0, "lock": False, "show": True}]
+    pm_tpl = [f for f in old_pm[tpl_pid] if f[0] not in (3, 4)]   # 3 = aktuelle Ebene, 4 = Seitenname
+    setf(pm_tpl, 2, jdump({"layerList": layer0}))
     vp_out, pm_out = [], []
     for n, (pid, e) in enumerate(zip(new_ids, pages)):
         r = list(vp_tpl)
@@ -377,8 +381,10 @@ def cmd_build(a):
         setf(r, 10, ("document/%s/resource/content/%s" % (doc, pdf_name)).encode())
         setf(r, 11, jdump({"pageIndex": e["pdf"], "pageReferenceId": "pdf-%d-0" % objs[e["pdf"]], "pageUUID": ""}))
         vp_out.append((1, 2, encode(r)))
-        r = list(pm_tpl)
+        src = e.get("from")
+        r = list(old_pm[src]) if src in old_pm else list(pm_tpl)
         setf(r, 1, pid.encode()); setf(r, 5, now, 0); setf(r, 6, now, 0)
+        setf(r, 7, getf(pm_tpl, 7))   # Seitenrechteck einer PDF-Seite, auch wenn die Quelle eine leere Seite war
         pm_out.append((1, 2, encode(r)))
     if pm_doc:
         r = list(pm_doc)
@@ -391,8 +397,14 @@ def cmd_build(a):
     setf(ni, 1, doc.encode()); setf(ni, 2, now, 0); setf(ni, 3, now, 0)
     setf(ni, 6, title.encode())
     info = json.loads(getf(ni, 12))
-    pinfo = next(iter(info["pageInfoMap"].values()))
-    info["pageInfoMap"] = {pid: dict(pinfo) for pid in new_ids}
+    old_info = info["pageInfoMap"]
+    tpl_info = {k: v for k, v in old_info[tpl_pid].items() if k != "title"}
+    tpl_info.update(currentLayerId=0, layerList=layer0)
+    info["pageInfoMap"] = {}
+    for pid, e in zip(new_ids, pages):
+        p = dict(old_info.get(e.get("from"), tpl_info))
+        p["width"], p["height"] = tpl_info["width"], tpl_info["height"]
+        info["pageInfoMap"][pid] = p
     setf(ni, 12, jdump(info))
     setf(ni, 19, 0, 0)
     setf(ni, 20, jdump({"pageNameList": new_ids}))
@@ -458,10 +470,13 @@ def cmd_check(a):
             fail("PDF-Verweis falsch auf Seite %d" % (n.pages.index(p) + 1))
     dump = open(a.strokes, "w") if a.strokes else None
     links = []
+    layers = {p: {l["id"] for l in v["layerList"]} for p, v in json.loads(getf(n.ni, 12))["pageInfoMap"].items()}
     for zname, page, _, _, recs in n.shapes():
         if page not in ids:
             fail("Striche für unbekannte Seite " + page)
         for r in recs:
+            if (getf(r, 6) or 0) not in layers[page]:
+                fail("Striche auf Ebene %d, die Seite %d nicht hat" % (getf(r, 6) or 0, n.pages.index(page) + 1))
             bean = getf(r, 10)
             if bean:
                 d = json.loads(bean)["docBean"]
