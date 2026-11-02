@@ -372,19 +372,31 @@ def cmd_build(a):
     setf(pm_tpl, 2, jdump({"layerList": layer0}))
     vp_out, pm_out = [], []
     for n, (pid, e) in enumerate(zip(new_ids, pages)):
-        r = list(vp_tpl)
-        setf(r, 1, pid.encode()); setf(r, 2, now, 0); setf(r, 3, now, 0)
+        # Seiteneintrag der Quellseite übernehmen (Zeitstempel und unbekannte Felder bleiben),
+        # nur bei neuen Seiten oder Quellen ohne PDF (auf dem Gerät eingefügte leere Seite) die Vorlage
+        src = e.get("from")
+        if src in old.vp and old.pdf_index(src) is not None:
+            r = list(old.vp[src])
+        else:
+            r = list(vp_tpl)
+            setf(r, 2, now, 0); setf(r, 3, now, 0)
+        setf(r, 1, pid.encode())
         setf(r, 4, struct.pack("<f", n + 1), 5)
-        setf(r, 6, rect(0.0, 0.0, width0, r6h))
-        setf(r, 7, rect(0.0, (r6h - h7) / 2, width0, (r6h + h7) / 2))
-        setf(r, 8, rect(0.0, 0.0, pw, ph))
+        if json.loads(getf(r, 8)) != json.loads(rect(0.0, 0.0, pw, ph)):   # Seitengröße nur bei geändertem PDF-Format neu
+            setf(r, 6, rect(0.0, 0.0, width0, r6h))
+            setf(r, 7, rect(0.0, (r6h - h7) / 2, width0, (r6h + h7) / 2))
+            setf(r, 8, rect(0.0, 0.0, pw, ph))
         setf(r, 10, ("document/%s/resource/content/%s" % (doc, pdf_name)).encode())
         setf(r, 11, jdump({"pageIndex": e["pdf"], "pageReferenceId": "pdf-%d-0" % objs[e["pdf"]], "pageUUID": ""}))
         vp_out.append((1, 2, encode(r)))
-        src = e.get("from")
-        r = list(old_pm[src]) if src in old_pm else list(pm_tpl)
-        setf(r, 1, pid.encode()); setf(r, 5, now, 0); setf(r, 6, now, 0)
-        setf(r, 7, getf(pm_tpl, 7))   # Seitenrechteck einer PDF-Seite, auch wenn die Quelle eine leere Seite war
+        if src in old_pm:
+            r = list(old_pm[src])
+        else:
+            r = list(pm_tpl)
+            setf(r, 5, now, 0); setf(r, 6, now, 0)
+        setf(r, 1, pid.encode())
+        if src not in old.vp or old.pdf_index(src) is None:   # Quelle war eine leere Seite: Rechteck einer PDF-Seite
+            setf(r, 7, getf(pm_tpl, 7))
         pm_out.append((1, 2, encode(r)))
     if pm_doc:
         r = list(pm_doc)
@@ -402,8 +414,10 @@ def cmd_build(a):
     tpl_info.update(currentLayerId=0, layerList=layer0)
     info["pageInfoMap"] = {}
     for pid, e in zip(new_ids, pages):
-        p = dict(old_info.get(e.get("from"), tpl_info))
-        p["width"], p["height"] = tpl_info["width"], tpl_info["height"]
+        src = e.get("from")
+        p = dict(old_info.get(src, tpl_info))
+        if src in old.vp and old.pdf_index(src) is None:   # Quelle war eine leere Seite: Größe einer PDF-Seite
+            p["width"], p["height"] = old_info[tpl_pid]["width"], old_info[tpl_pid]["height"]
         info["pageInfoMap"][pid] = p
     setf(ni, 12, jdump(info))
     setf(ni, 19, 0, 0)

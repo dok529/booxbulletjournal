@@ -9,6 +9,10 @@ Eine BOOX-Notiz, die aus einem PDF erstellt wurde, speichert die Handschrift als
 
 Die Skripte liegen in `scripts/` (Pfad relativ zu diesem Skill). Python immer mit `-I` starten, Arbeitsdateien in den Scratchpad legen (`--work`), nie neben die Notiz.
 
+## Grundsatz
+
+**So wenig wie möglich ändern, so viel wie möglich übernehmen.** Jeder Datensatz einer Seite (Shapes, Punkte, Seiteninfo, Seitenmodell, Ebenen, Seitenname) kommt von seiner Quellseite. Überschrieben werden nur Felder, die sich zwingend ändern: IDs, Seitennummer, PDF-Bezug, Link-Ziele. Unbekannte Felder bleiben unverändert. Nie einen Datensatz aus einer Vorlageseite für alle Seiten neu aufbauen: Genau so gingen einmal Ebenen und Seitennamen verloren, und Handschrift auf Ebene 1 war auf dem Gerät unsichtbar. Vor dem Abliefern deshalb die Seitendaten alt/neu feldweise vergleichen, nicht nur Strichzahlen und Kontrollbilder.
+
 ## Ablauf
 
 ### 1. Eingaben klären
@@ -66,6 +70,12 @@ python3 -I scripts/notemig.py --work <scratch> build <scratch>/plan.json -o "<Zi
 python3 -I scripts/notemig.py --work <scratch> check "<Ziel>.note" --strokes <scratch>/striche.txt
 swift scripts/overlay.swift <scratch>/NEU.pdf <scratch>/striche.txt <scratch>/kontrolle
 ```
+
+```bash
+python3 -I scripts/compare.py --work <scratch> ALT.note "<Ziel>.note" <scratch>/plan.json
+```
+
+`compare` vergleicht die Seitendaten alt/neu feldweise. Erwartet sind nur Änderungen an Seiten-ID, Seitennummer, PDF-Pfad und PDF-Verweis. Alles, was als „PRÜFEN“ erscheint, ist ein Verlust und muss vor dem Abliefern erklärt oder behoben werden.
 
 `check` prüft die Seiten-IDs, die PDF-Verweise, die Punktedateien und die Link-Ziele. `overlay.swift` legt die Striche rot über die PDF-Seiten. Sieh dir die Kontrollbilder der Seiten mit Strichen selbst an, verkleinert mit `sips -Z 900`. Sie dienen nur deiner Prüfung: Leg sie nicht ins Projekt und zeig sie nur, wenn der Nutzer danach fragt.
 
