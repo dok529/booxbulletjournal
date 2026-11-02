@@ -61,7 +61,7 @@ Navigation über PDF-Links:
 - Monat: ‹ › Vor-/Folgemonat, KW-Badges → Woche, FUTURE, INDEX
 - Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, FUTURE, INDEX
 - Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE, INDEX
-- Gewohnheit: KW-Beschriftungen → Woche, INDEX
+- Gewohnheit: KW-Beschriftungen (ab KW 44/2026) → Woche, INDEX
 - Collection: FUTURE, INDEX
 - Alle Seiten außer Deckblatt, Regeln und Gewohnheit: Knopf ✓ unten rechts → Gewohnheitsseite
 
@@ -78,7 +78,7 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 4–8 | Future Log, drei Monate pro Seite |
 | 9–22 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
 | 23–146 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
-| 147 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), alle Wochen des Zeitraums als Zeilen Mo–So |
+| 147 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), je Kalenderjahr eine Spalte mit allen Wochen als Zeilen Mo–So |
 | 148–149 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
 Format 458,88 × 597,12 pt (3:4).
