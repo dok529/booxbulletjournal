@@ -25,7 +25,8 @@ Die Regelseite (Seite 3) fasst zusammen, wie das Journal geführt wird.
 | < | zurückgestellt: Monatsseite oder Future Log |
 | @ | wartet auf jemanden, delegiert (@Name) |
 | ○ | Termin, Ereignis |
-| – | Notiz, Gedanke, Beobachtung |
+| – | Notiz, Gedanke, Beobachtung, Fakt |
+| = | Stimmung, Gefühl, körperliches Empfinden |
 | * | wichtig (vor das Bullet) |
 | ! | Idee, Inspiration (vor das Bullet) |
 | ? | zu klären, recherchieren (vor das Bullet) |
@@ -37,7 +38,7 @@ Eine durchgestrichene Aufgabe ist hinfällig.
 - Future Log: Termine, Fristen und Vorhaben ab dem nächsten Monat, unter den Monat; mit Datum, wenn es eins gibt. Auch aktive Collections mit Aufgaben unter dem Monat vermerken.
 - Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen; rechts unten: konkrete Aufgaben des Monats. Aktive Collections mit Aufgaben hier vermerken.
 - Woche: Aufgaben und Termine dieser Woche, per Kästchen auf Tage verteilt. Ausgefülltes Kästchen = Ereignis, das andere Aktivitäten blockieren kann. Nx = Aktivitäten, die sich in der Folgewoche fortsetzen.
-- Daily: Tageslog mit Datum als Überschrift, kurz mit Bullets.
+- Daily: Tageslog mit Datum als Überschrift, kurz mit Bullets. Stimmungen mit =, gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert.
 - Collection: alles ohne Datum (Ideen, Listen, Projekte); neue Collections in den Index eintragen.
 - Gewohnheit: was sich regelmäßig wiederholt, eine Seite pro Gewohnheit.
 - Index: neue Collections und Seiten, die man wiederfinden will.
@@ -46,7 +47,7 @@ Eine durchgestrichene Aufgabe ist hinfällig.
 
 - Täglich: Daily datieren, mitloggen, abends abhaken oder in der Woche weiterplanen.
 - Wöchentlich: jede offene Aufgabe mit > in die neue Woche oder eine Collection, mit < zurück auf Monat / Future Log, oder streichen. Dann auf der Monatsseite nachsehen, was in die neue Woche fällt, und übertragen.
-- Monatlich: Future Log des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen.
+- Monatlich: Future Log des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen. =-Einträge überfliegen: Was wiederholt sich?
 
 Migrieren ist ein Filter: Was das Abschreiben nicht wert ist, wird gestrichen.
 

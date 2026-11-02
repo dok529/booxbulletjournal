@@ -611,7 +611,8 @@ func drawRules(_ ctx: CGContext) {
         [("•", "**Aufgabe**"), ("/", "**angefangen**; zweiter Strich macht daraus ×"), ("×", "**erledigt**"), (">", "**migriert**: nächste Woche oder Collection"),
          ("<", "**zurückgestellt**: Monatsseite oder Future Log"),
          ("@", "**wartet** auf jemanden, delegiert (@Name)")],
-        [("○", "**Termin**, Ereignis"), ("–", "**Notiz**, Gedanke, Beobachtung"), ("*", "**wichtig** (vor das Bullet)"),
+        [("○", "**Termin**, Ereignis"), ("–", "**Notiz**, Gedanke, Beobachtung, Fakt"),
+         ("=", "**Stimmung**, Gefühl, körperliches Empfinden"), ("*", "**wichtig** (vor das Bullet)"),
          ("!", "**Idee**, Inspiration (vor das Bullet)"),
          ("?", "**zu klären**, recherchieren (vor das Bullet)")],
     ]
@@ -638,7 +639,8 @@ func drawRules(_ ctx: CGContext) {
             + "Rechts unten: konkrete Aufgaben des Monats. **Aktive Collections mit Aufgaben** hier vermerken."),
         ("WOCHE", "Aufgaben und Termine **dieser Woche**, per Kästchen auf Tage verteilt. **Ausgefülltes Kästchen** = Ereignis, "
             + "das andere Aktivitäten blockieren kann. **Nx** = Aktivitäten, die sich in der Folgewoche fortsetzen."),
-        ("DAILY", "Tageslog: Datum als Überschrift, dann schnell und kurz mit Bullets notieren. Gedanken dürfen hierher."),
+        ("DAILY", "Tageslog: Datum als Überschrift, dann kurz mit Bullets notieren. **Stimmungen mit =**, "
+            + "gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert."),
         ("COLLECTION", "Alles **ohne Datum**: Ideen, Listen, Projekte, Recherchen. Neue Collection sofort in den Index eintragen."),
         ("GEWOHNHEIT", "Was sich **regelmäßig wiederholt**: eine Seite pro Gewohnheit, täglich abhaken."),
         ("INDEX", "Neue Collections und Seiten, die du wiederfinden willst, mit Link-Symbol eintragen."),
@@ -652,7 +654,8 @@ func drawRules(_ ctx: CGContext) {
         ("TÄGLICH", "Morgens die Daily datieren, über den Tag mitloggen. Abends abhaken: × oder in der Woche weiterplanen."),
         ("WÖCHENTLICH", "Jede offene • der Woche: **>** in die neue Woche oder eine Collection, **<** zurück auf Monat / Future Log, oder streichen. "
             + "Dann auf der **Monatsseite** nachsehen, was in die neue Woche fällt, und übertragen. Neue Daily kopieren."),
-        ("MONATLICH", "**Future Log** des neuen Monats auf die Monatsseite übertragen. Offene Themen des alten Monats migrieren oder streichen."),
+        ("MONATLICH", "**Future Log** des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen. "
+            + "**=-Einträge** überfliegen: Was wiederholt sich?"),
     ]
     for (name, text) in rhythm { y += labelRow(ctx, name, text, y: y) + 5 }
     y += 3
