@@ -643,10 +643,10 @@ func drawRules(_ ctx: CGContext) {
     // Was wohin: vom Langfristigen zum Heute
     y = section(ctx, "WAS WOHIN", y: y)
     let places: [(String, String)] = [
-        ("FUTURE LOG", "Termine, Fristen und Vorhaben **ab dem nächsten Monat**, unter den Monat; mit Datum, wenn es eins gibt. "
-            + "Auch **aktive Collections mit Aufgaben** unter dem Monat vermerken."),
+        ("FUTURE LOG", "Fristen und Vorhaben **ohne festen Tag** ab dem nächsten Monat, unter den Monat; **feste Termine** gleich "
+            + "auf die Monatsseite. Auch **aktive Collections mit Aufgaben** vermerken."),
         ("MONAT", "**Die Monatsseite ist das Future Log der Wochen.** Links an den Tag: Termine und Fristen dieses Monats, "
-            + "auch was erst in zwei Wochen dran ist. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen. "
+            + "**feste Termine** auch Monate im Voraus. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen. "
             + "Rechts unten: konkrete Aufgaben des Monats. **Aktive Collections mit Aufgaben** hier vermerken."),
         ("WOCHE", "Aufgaben und Termine **dieser Woche**, per Kästchen auf Tage verteilt. **Ausgefülltes Kästchen** = Ereignis, "
             + "das andere Aktivitäten blockieren kann. **Nx** = Aktivitäten, die sich in der Folgewoche fortsetzen."),
@@ -673,8 +673,8 @@ func drawRules(_ ctx: CGContext) {
 
     // Faustregeln als Frage → Ziel
     y = section(ctx, "FAUSTREGELN", y: y)
-    let rules = [("Erst im nächsten Monat oder später?", "Future Log"), ("Diesen Monat, aber nicht diese Woche?", "Monatsseite"),
-                 ("Diese Woche?", "Wochenseite"), ("Kein Datum?", "Collection"), ("Wiederholt sich?", "Gewohnheit")]
+    let rules = [("Fester Termin?", "Monatsseite des Termins"), ("Später, aber ohne festen Tag?", "Future Log"),
+                 ("Diese Woche?", "Wochenseite"), ("Diesen Monat, aber nicht diese Woche?", "Monatsseite")]
     let qf = font("AvenirNext-Regular", 8), af = font("AvenirNext-DemiBold", 8)
     for (i, (q, a)) in rules.enumerated() {
         let x = cLeft + CGFloat(i % 2) * colW, yy = y + CGFloat(i / 2) * 13
@@ -682,7 +682,7 @@ func drawRules(_ ctx: CGContext) {
         drawText(ctx, ql, x: x, yMid: yy + 5, f: qf)
         drawText(ctx, line("→ " + a, af, dark), x: x + width(ql) + 5, yMid: yy + 5, f: af)
     }
-    y += 3 * 13 + 2
+    y += CGFloat((rules.count + 1) / 2) * 13 + 2
     paragraph(ctx, "Migrieren ist ein Filter: Was das Abschreiben nicht wert ist, wird gestrichen.", x: cLeft, y: y, w: cRight - cLeft)
 }
 

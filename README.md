@@ -35,8 +35,8 @@ Eine durchgestrichene Aufgabe ist hinfällig.
 
 **Was wohin**
 
-- Future Log: Termine, Fristen und Vorhaben ab dem nächsten Monat, unter den Monat; mit Datum, wenn es eins gibt. Auch aktive Collections mit Aufgaben unter dem Monat vermerken.
-- Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen; rechts unten: konkrete Aufgaben des Monats. Aktive Collections mit Aufgaben hier vermerken.
+- Future Log: Fristen und Vorhaben ohne festen Tag ab dem nächsten Monat, unter den Monat; feste Termine gleich auf die Monatsseite. Auch aktive Collections mit Aufgaben vermerken.
+- Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats, feste Termine auch Monate im Voraus. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen; rechts unten: konkrete Aufgaben des Monats. Aktive Collections mit Aufgaben hier vermerken.
 - Woche: Aufgaben und Termine dieser Woche, per Kästchen auf Tage verteilt. Ausgefülltes Kästchen = Ereignis, das andere Aktivitäten blockieren kann. Nx = Aktivitäten, die sich in der Folgewoche fortsetzen.
 - Daily: Tageslog mit Datum als Überschrift, kurz mit Bullets. Stimmungen mit =, gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert.
 - Collection: alles ohne Datum (Ideen, Listen, Projekte); neue Collections in den Index eintragen.
