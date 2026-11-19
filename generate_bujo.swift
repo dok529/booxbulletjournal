@@ -276,7 +276,7 @@ func drawIndex(_ ctx: CGContext) {
 
     // Vorbelegt: Regeln, Future Log und alle Monate als Links. Ohne Seitenzahl, weil sich die
     // Seitenzahlen auf dem BOOX durch eingefügte Seiten verschieben.
-    let entries = [("Regeln", rulesPage), ("Future Log", futurePage(forMonth: 0))]
+    let entries = [("Regeln", rulesPage), ("Jahresziele \(endYear)", goalsPage), ("Future Log", futurePage(forMonth: 0))]
         + months.indices.map { ("\(monthNames[months[$0].month - 1].capitalized) \(months[$0].year)", monthPage($0)) }
         + [("Wochen (ab KW \(cal.component(.weekOfYear, from: weeks[0])))", weekPage(0)),
            ("Gewohnheiten", trackerPage), ("Collections", collectionPage)]
@@ -675,6 +675,63 @@ func drawRules(_ ctx: CGContext) {
     paragraph(ctx, "Migrieren ist ein Filter: Was das Abschreiben nicht wert ist, wird gestrichen.", x: cLeft, y: y, w: cRight - cLeft)
 }
 
+// MARK: - Jahresziele (nach den Regeln): je Lebensbereich Zufriedenheit 1–10 und Ziele sammeln, dann nach kurz/mittel/lang sortieren
+
+func smallLabel(_ ctx: CGContext, _ s: String, x: CGFloat, yMid: CGFloat) {
+    let f = font("AvenirNext-DemiBold", 6)
+    drawText(ctx, line(s, f, dark, kern: 1), x: x, yMid: yMid, f: f)
+}
+
+func drawGoals(_ ctx: CGContext) {
+    pageTitle(ctx, "JAHRESZIELE \(endYear)")
+    navButtons(ctx, [("FUTURE", futurePage(forMonth: 0)), ("INDEX", indexPage)])
+
+    // Sammeln: sechs Lebensbereiche, je Skala „heute“ und Schreiblinien
+    var y = section(ctx, "SAMMELN NACH BEREICHEN", y: cTop + 2)
+    let areas = ["GESUNDHEIT", "BEZIEHUNGEN", "BERUF", "FINANZEN", "LERNEN", "FREIZEIT"]
+    let gap: CGFloat = 8, bw = (cRight - cLeft - 2 * gap) / 3, bh: CGFloat = 122, lineH: CGFloat = 15
+    let sf = font("AvenirNext-Medium", 4.5)
+    for (k, a) in areas.enumerated() {
+        let x = cLeft + CGFloat(k % 3) * (bw + gap), by = y + CGFloat(k / 3) * (bh + gap)
+        ctx.setFillColor(light)
+        ctx.fill(rect(x, by, bw, 14))
+        label(ctx, a, x: x + 5, yMid: by + 7, color: black)
+        ctx.setStrokeColor(rule); ctx.setLineWidth(0.5)
+        ctx.stroke(rect(x, by, bw, bh))
+        smallLabel(ctx, "HEUTE", x: x + 5, yMid: by + 24)
+        let d: CGFloat = 8.5, sx = x + 34, step = (bw - 34 - 5 - d) / 9
+        for n in 0..<10 {
+            let c = rect(sx + CGFloat(n) * step, by + 24 - d / 2, d, d)
+            ctx.strokeEllipse(in: c)
+            drawCentered(ctx, String(n + 1), f: sf, color: dark, cx: c.midX, yMid: by + 24)
+        }
+        var ly = by + 34 + lineH
+        while ly < by + bh - 6 {
+            strokeLine(ctx, x + 5, ly, x + bw - 5, ly)
+            ly += lineH
+        }
+    }
+    y += 2 * bh + gap + 10
+
+    // Sortieren nach Zeithorizont
+    y = section(ctx, "SORTIEREN", y: y)
+    let cols = [("KURZ", "Wochen"), ("MITTEL", "Monate"), ("LANG", "über das Jahr")]
+    let tf = font("AvenirNext-Regular", 7), pf = font("AvenirNext-DemiBold", 7.5)
+    for (k, c) in cols.enumerated() {
+        let x = cLeft + CGFloat(k) * (bw + gap)
+        ctx.setFillColor(dark)
+        pill(ctx, rect(x, y, bw, 14), radius: 3)
+        drawCentered(ctx, c.0, f: pf, color: white, cx: x + bw / 2, yMid: y + 7, kern: 1)
+        drawCentered(ctx, c.1, f: tf, color: dark, cx: x + bw / 2, yMid: y + 22)
+        ctx.setStrokeColor(rule); ctx.setLineWidth(0.5)
+        var ly = y + 28 + lineH
+        while ly < cBottom - 24 {
+            strokeLine(ctx, x, ly, x + bw, ly)
+            ly += lineH
+        }
+    }
+}
+
 // MARK: - PDF schreiben
 
 var mediaBox = CGRect(x: 0, y: 0, width: W, height: H)
@@ -713,13 +770,14 @@ while w <= lastDay {
 }
 func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0], to: date).day! / 7 }
 
-// Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Regeln, Future Log, Monate,
+// Seitenaufteilung (0-basiert): Deckblatt, dann wie im Buch Index, Regeln, Jahresziele, Future Log, Monate,
 // danach alle Wochen (je Wochenseite + Wochen-Daily), die Gewohnheitsseite und zwei Collections
 let indexPage = 1
 let rulesPage = indexPage + 1
+let goalsPage = rulesPage + 1
 let futureCount = (months.count + 2) / 3
-func futurePage(forMonth i: Int) -> Int { rulesPage + 1 + i / 3 }
-func monthPage(_ i: Int) -> Int { rulesPage + 1 + futureCount + i }
+func futurePage(forMonth i: Int) -> Int { goalsPage + 1 + i / 3 }
+func monthPage(_ i: Int) -> Int { goalsPage + 1 + futureCount + i }
 func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
 let trackerPage = weekPage(weeks.count)
 let collectionPage = trackerPage + 1
@@ -727,6 +785,7 @@ let collectionPage = trackerPage + 1
 page(habit: false, drawCover)
 page(drawIndex)
 page(habit: false, drawRules)
+page(drawGoals)
 for p in 0..<futureCount { page { drawFuture($0, page: p) } }
 for i in months.indices { page { drawMonth($0, index: i) } }
 for i in weeks.indices {

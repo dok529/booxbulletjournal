@@ -56,8 +56,9 @@ Migrieren ist ein Filter: Was das Abschreiben nicht wert ist, wird gestrichen.
 Navigation über PDF-Links:
 
 - Deckblatt: Monatsleiste → Monat
-- Index: vorbelegte Einträge für Regeln, Future Log, alle Monate, die Wochen, die Gewohnheiten und die Collections
+- Index: vorbelegte Einträge für Regeln, Jahresziele, Future Log, alle Monate, die Wochen, die Gewohnheiten und die Collections
 - Regeln: FUTURE, INDEX
+- Jahresziele: FUTURE, INDEX
 - Future Log: Monatsbalken → Monat, INDEX
 - Monat: ‹ › Vor-/Folgemonat, KW-Badges → Woche, FUTURE, INDEX
 - Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, FUTURE, INDEX
@@ -76,11 +77,12 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 1 | Deckblatt mit Zeitraum und Monatsleiste |
 | 2 | Index (Thema / Seiten) |
 | 3 | Regeln: Bullets, was wohin, Rhythmus, Faustregeln |
-| 4–8 | Future Log, drei Monate pro Seite |
-| 9–22 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
-| 23–146 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
-| 147 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), je Kalenderjahr eine Spalte mit allen Wochen als Zeilen Mo–So |
-| 148–149 | Collections: leere Schreiblinie für das Thema, Punktraster |
+| 4 | Jahresziele: sechs Lebensbereiche mit Zufriedenheit 1–10 und Zielen, darunter nach kurz / mittel / lang sortieren |
+| 5–9 | Future Log, drei Monate pro Seite |
+| 10–23 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
+| 24–147 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
+| 148 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), je Kalenderjahr eine Spalte mit allen Wochen als Zeilen Mo–So |
+| 149–150 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
 Format 458,88 × 597,12 pt (3:4).
 
@@ -89,10 +91,12 @@ Format 458,88 × 597,12 pt (3:4).
 | Deckblatt | Index | Regeln |
 |:---:|:---:|:---:|
 | <img src="previews/deckblatt.png" width="260" alt="Deckblatt"> | <img src="previews/index.png" width="260" alt="Index"> | <img src="previews/regeln.png" width="260" alt="Regeln"> |
-| **Future Log** | **Monat** | **Woche** |
-| <img src="previews/future-log.png" width="260" alt="Future Log"> | <img src="previews/monat.png" width="260" alt="Monatsseite"> | <img src="previews/woche.png" width="260" alt="Wochenseite"> |
-| **Wochen-Daily** | **Gewohnheit** | **Collection** |
-| <img src="previews/wochen-daily.png" width="260" alt="Wochen-Daily"> | <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> | <img src="previews/collection.png" width="260" alt="Collection"> |
+| **Jahresziele** | **Future Log** | **Monat** |
+| <img src="previews/jahresziele.png" width="260" alt="Jahresziele"> | <img src="previews/future-log.png" width="260" alt="Future Log"> | <img src="previews/monat.png" width="260" alt="Monatsseite"> |
+| **Woche** | **Wochen-Daily** | **Gewohnheit** |
+| <img src="previews/woche.png" width="260" alt="Wochenseite"> | <img src="previews/wochen-daily.png" width="260" alt="Wochen-Daily"> | <img src="previews/gewohnheit.png" width="260" alt="Gewohnheits-Tracker"> |
+| **Collection** | | |
+| <img src="previews/collection.png" width="260" alt="Collection"> | | |
 
 ## Neu erzeugen
 
