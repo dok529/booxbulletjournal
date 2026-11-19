@@ -21,7 +21,7 @@ Die Regelseite (Seite 3) fasst zusammen, wie das Journal geführt wird.
 | • | Aufgabe |
 | / | angefangen; zweiter Strich macht daraus × |
 | × | erledigt |
-| > | migriert: nächste Woche oder Collection |
+| > | migriert: verschoben oder in Collection |
 | < | zurückgestellt: Monatsseite oder Future Log |
 | @ | wartet auf jemanden, delegiert (@Name) |
 | ○ | Termin, Ereignis |

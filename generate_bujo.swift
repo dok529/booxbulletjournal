@@ -608,7 +608,7 @@ func drawRules(_ ctx: CGContext) {
     // Bullets: zwei Spalten, Symbol + Bedeutung
     var y = section(ctx, "BULLETS", y: cTop + 2)
     let bullets: [[(String, String)]] = [
-        [("•", "**Aufgabe**"), ("/", "**angefangen**; zweiter Strich macht daraus ×"), ("×", "**erledigt**"), (">", "**migriert**: nächste Woche oder Collection"),
+        [("•", "**Aufgabe**"), ("/", "**angefangen**; zweiter Strich macht daraus ×"), ("×", "**erledigt**"), (">", "**migriert**: verschoben oder in Collection"),
          ("<", "**zurückgestellt**: Monatsseite oder Future Log"),
          ("@", "**wartet** auf jemanden, delegiert (@Name)")],
         [("○", "**Termin**, Ereignis"), ("–", "**Notiz**, Gedanke, Beobachtung, Fakt"),
