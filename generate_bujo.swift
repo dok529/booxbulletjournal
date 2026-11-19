@@ -80,13 +80,16 @@ func pill(_ ctx: CGContext, _ r: CGRect, radius: CGFloat) {
 
 var links: [(page: Int, rect: CGRect, target: Int)] = []
 var currentPage = 0
+var habitInNav = true   // Gewohnheits-Knopf ✓ als letzter Knopf in der Kopfzeile (pro Seite in page() gesetzt)
+let habitMark = "✓"
 
 func link(_ r: CGRect, to target: Int) { links.append((currentPage, r, target)) }
 
-/// Navigationsknöpfe rechts in der Kopfzeile, von links nach rechts angeordnet.
+/// Navigationsknöpfe rechts in der Kopfzeile, von links nach rechts angeordnet, ggf. mit Gewohnheits-Knopf am Ende.
 /// Gibt den linken Rand des ersten Knopfs zurück.
 @discardableResult
 func navButtons(_ ctx: CGContext, _ items: [(label: String, target: Int)], minWidth: CGFloat = 46) -> CGFloat {
+    let items = habitInNav ? items + [(habitMark, trackerPage)] : items
     let f = font("AvenirNext-DemiBold", 7.5)
     let h: CGFloat = 17, gap: CGFloat = 5
     let widths = items.map { $0.label.count <= 1 ? 20 : max(minWidth, width(line($0.label, f, white, kern: 1)) + 16) }
@@ -96,8 +99,12 @@ func navButtons(_ ctx: CGContext, _ items: [(label: String, target: Int)], minWi
         let r = rect(x, headMid - h / 2, w, h)
         ctx.setFillColor(dark)
         pill(ctx, r, radius: 3)
-        drawCentered(ctx, item.label, f: item.label.count <= 1 ? font("AvenirNext-Bold", 16) : f,
-                     color: white, cx: r.midX, yMid: headMid, kern: item.label.count <= 1 ? 0 : 1)
+        if item.label == habitMark {
+            checkMark(ctx, r)
+        } else {
+            drawCentered(ctx, item.label, f: item.label.count <= 1 ? font("AvenirNext-Bold", 16) : f,
+                         color: white, cx: r.midX, yMid: headMid, kern: item.label.count <= 1 ? 0 : 1)
+        }
         link(r, to: item.target)
         x += w + gap
     }
@@ -421,30 +428,25 @@ func drawTracker(_ ctx: CGContext) {
     }
 }
 
-// MARK: - Gewohnheits-Knopf (unten rechts über dem Inhalt, ohne Text, mit Häkchen)
+// MARK: - Gewohnheits-Knopf: weißes Häkchen im dunklen Knopf, ohne Text
 
-func habitButton(_ ctx: CGContext) {
-    let s: CGFloat = 20
-    let r = rect(W - margin - s, H - margin - s, s, s)
-    ctx.setFillColor(dark)
-    pill(ctx, r, radius: 4)
+func checkMark(_ ctx: CGContext, _ r: CGRect) {
     ctx.saveGState()
-    ctx.setStrokeColor(white); ctx.setLineWidth(1.8); ctx.setLineCap(.round); ctx.setLineJoin(.round)
-    ctx.move(to: CGPoint(x: r.minX + 5.5, y: r.midY + 0.5))
-    ctx.addLine(to: CGPoint(x: r.minX + 8.8, y: r.minY + 6))
-    ctx.addLine(to: CGPoint(x: r.maxX - 5, y: r.maxY - 5.5))
+    ctx.setStrokeColor(white); ctx.setLineWidth(1.7); ctx.setLineCap(.round); ctx.setLineJoin(.round)
+    ctx.move(to: CGPoint(x: r.minX + 6, y: r.midY + 0.5))
+    ctx.addLine(to: CGPoint(x: r.minX + 9, y: r.minY + 4.5))
+    ctx.addLine(to: CGPoint(x: r.maxX - 5.5, y: r.maxY - 4.5))
     ctx.strokePath()
     ctx.restoreGState()
-    link(r, to: trackerPage)
 }
 
 // MARK: - Wochen-Daily (nach jeder Wochenseite): Datumsbereich als Überschrift, freies Punktraster
 
-func weekRange(_ days: [Date]) -> String {
+func weekRange(_ days: [Date], shortYear: Bool = false) -> String {
     let df = DateFormatter()
     df.dateFormat = "dd.MM."
     let yf = DateFormatter()
-    yf.dateFormat = "dd.MM.yyyy"
+    yf.dateFormat = shortYear ? "dd.MM.yy" : "dd.MM.yyyy"
     let sameYear = cal.component(.year, from: days[0]) == cal.component(.year, from: days[6])
     return "\((sameYear ? df : yf).string(from: days[0])) – \(yf.string(from: days[6]))"
 }
@@ -473,11 +475,14 @@ func futurePage(forWeek days: [Date]) -> Int {
 func drawWeekDaily(_ ctx: CGContext, index wi: Int) {
     let monday = weeks[wi]
     let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: monday)! }
-    let tf = font("AvenirNext-Regular", 15)
-    drawText(ctx, line(weekRange(days), tf, black, kern: 1), x: margin, yMid: headMid, f: tf)
     let nav = [("KW \(cal.component(.weekOfYear, from: monday))", weekPage(wi))] + monthButtons(days)
         + [("FUTURE", futurePage(forWeek: days)), ("INDEX", indexPage)]
-    navButtons(ctx, nav, minWidth: 34)
+    let navLeft = navButtons(ctx, nav, minWidth: 34)
+    // Datumsbereich als Überschrift; bei voller Kopfzeile mit zweistelligem Jahr
+    let tf = font("AvenirNext-Regular", 15)
+    var title = line(weekRange(days), tf, black, kern: 1)
+    if margin + width(title) > navLeft - 6 { title = line(weekRange(days, shortYear: true), tf, black, kern: 1) }
+    drawText(ctx, title, x: margin, yMid: headMid, f: tf)
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)
@@ -504,16 +509,19 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     let titleFont = font("AvenirNext-Regular", 18)
     let title = line("KW \(cal.component(.weekOfYear, from: monday))", titleFont, black, kern: 1.5)
     drawText(ctx, title, x: margin, yMid: headMid, f: titleFont)
-    let range = weekRange(days)
-    let rf = font("AvenirNext-Medium", 8.5)
-    drawText(ctx, line(range, rf, dark, kern: 0.5), x: margin + width(title) + 8, yMid: headMid + 1, f: rf)
 
     var nav: [(label: String, target: Int)] = []
     if wi > 0 { nav.append(("‹", weekPage(wi - 1))) }
     if wi < weeks.count - 1 { nav.append(("›", weekPage(wi + 1))) }
     nav += monthButtons(days)
     nav += [("FUTURE", futurePage(forWeek: days)), ("INDEX", indexPage)]
-    navButtons(ctx, nav, minWidth: 30)
+    let navLeft = navButtons(ctx, nav, minWidth: 30)
+
+    // Datumsbereich; bei voller Kopfzeile (Jahreswechsel, zwei Monatsknöpfe) mit zweistelligem Jahr
+    let rf = font("AvenirNext-Medium", 8.5), rx = margin + width(title) + 8
+    var range = line(weekRange(days), rf, dark, kern: 0.5)
+    if rx + width(range) > navLeft - 6 { range = line(weekRange(days, shortYear: true), rf, dark, kern: 0.5) }
+    drawText(ctx, range, x: rx, yMid: headMid + 1, f: rf)
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)
@@ -747,8 +755,8 @@ func page(habit: Bool = true, _ draw: (CGContext) -> Void) {
     ctx.beginPDFPage(nil)
     ctx.setFillColor(white)
     ctx.fill(mediaBox)
+    habitInNav = habit
     draw(ctx)
-    if habit { habitButton(ctx) }
     ctx.endPDFPage()
     currentPage += 1
 }

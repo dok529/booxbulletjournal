@@ -65,7 +65,7 @@ Navigation über PDF-Links:
 - Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE, INDEX
 - Gewohnheit: KW-Beschriftungen (ab KW 44/2026) → Woche, INDEX
 - Collection: FUTURE, INDEX
-- Alle Seiten außer Deckblatt, Regeln und Gewohnheit: Knopf ✓ unten rechts → Gewohnheitsseite
+- Alle Seiten außer Deckblatt, Regeln und Gewohnheit: Knopf ✓ oben rechts (letzter Knopf der Leiste) → Gewohnheitsseite
 
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt oder
 kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
