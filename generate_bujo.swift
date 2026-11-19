@@ -16,7 +16,7 @@ let endYear = 2027, endMonth = 12
 let futureExtraMonths = 3   // Future Log reicht so viele Monate über das Ende hinaus (ohne Monatsseite)
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "BuJo-2027 V2.1.pdf"
+    : "BuJo-2027 V3.pdf"
 
 // Seitenformat wie der Original-Planer (OnPlanners, vertikal)
 let W: CGFloat = 458.88, H: CGFloat = 597.12
