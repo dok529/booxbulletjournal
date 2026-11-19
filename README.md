@@ -78,11 +78,11 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 2 | Index (Thema / Seiten) |
 | 3 | Regeln: Bullets, was wohin, Rhythmus, Faustregeln |
 | 4 | Jahresziele: sechs Lebensbereiche mit Zufriedenheit 1–10 und Zielen, darunter nach kurz / mittel / lang sortieren |
-| 5–9 | Future Log, drei Monate pro Seite |
-| 10–23 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
-| 24–147 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
-| 148 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), je Kalenderjahr eine Spalte mit allen Wochen als Zeilen Mo–So |
-| 149–150 | Collections: leere Schreiblinie für das Thema, Punktraster |
+| 5–10 | Future Log, ein Kalenderquartal pro Seite: Nov/Dez 2026, vier Quartale 2027, Jan–Mär 2028 (ohne Monatsseite) |
+| 11–24 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
+| 25–148 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
+| 149 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), je Kalenderjahr eine Spalte mit allen Wochen als Zeilen Mo–So |
+| 150–151 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
 Format 458,88 × 597,12 pt (3:4).
 
@@ -101,7 +101,8 @@ Format 458,88 × 597,12 pt (3:4).
 ## Neu erzeugen
 
 Zeitraum über `startYear`/`startMonth`/`endYear`/`endMonth` oben in
-`generate_bujo.swift` einstellen, dann PDF und Vorschaubilder erzeugen:
+`generate_bujo.swift` einstellen (`futureExtraMonths`: wie viele Monate das
+Future Log über das Ende hinausreicht), dann PDF und Vorschaubilder erzeugen:
 
 ```bash
 swift generate_bujo.swift && swift render_previews.swift

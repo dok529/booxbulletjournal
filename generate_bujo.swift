@@ -13,6 +13,7 @@ import PDFKit
 
 let startYear = 2026, startMonth = 11
 let endYear = 2027, endMonth = 12
+let futureExtraMonths = 3   // Future Log reicht so viele Monate über das Ende hinaus (ohne Monatsseite)
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
     : "BuJo-2027 V2.1.pdf"
@@ -289,22 +290,24 @@ func drawIndex(_ ctx: CGContext) {
     }
 }
 
-// 2) Future Log: drei Monate pro Seite, je Mini-Kalender + Punktraster; Monatsbalken verlinken auf die Monatsseite
+// 2) Future Log: ein Kalenderquartal pro Seite, je Mini-Kalender + Punktraster; Monatsbalken verlinken auf die Monatsseite
 func drawFuture(_ ctx: CGContext, page p: Int) {
     pageTitle(ctx, "FUTURE LOG")
     navButtons(ctx, [("INDEX", indexPage)])
     let secH = (cBottom - cTop) / 3, barH: CGFloat = 17
     let mf = font("Menlo-Regular", 6.5), mfb = font("Menlo-Bold", 6.5)
-    for s in 0..<min(3, months.count - 3 * p) {
-        let mi = 3 * p + s, (y, m) = months[mi]
+    for (s, mi) in futureGroups[p].enumerated() {
+        let (y, m) = futureMonths[mi]
         let top = cTop + CGFloat(s) * secH
         let bar = rect(cLeft, top, cRight - cLeft, barH)
         ctx.setFillColor(dark)
         pill(ctx, bar, radius: 3)
         label(ctx, "\(monthNames[m - 1]) \(y)", x: cLeft + 8, yMid: top + barH / 2, color: white)
-        let more = line("ZUM MONAT ›", font("AvenirNext-DemiBold", 7.5), white, kern: 1.2)
-        drawText(ctx, more, x: cRight - 8 - width(more), yMid: top + barH / 2, f: font("AvenirNext-DemiBold", 7.5))
-        link(bar, to: monthPage(mi))
+        if mi < months.count {   // Monate nach dem Zeitraum haben keine Monatsseite
+            let more = line("ZUM MONAT ›", font("AvenirNext-DemiBold", 7.5), white, kern: 1.2)
+            drawText(ctx, more, x: cRight - 8 - width(more), yMid: top + barH / 2, f: font("AvenirNext-DemiBold", 7.5))
+            link(bar, to: monthPage(mi))
+        }
 
         // Mini-Kalender Mo–So
         let calX = cLeft, calW: CGFloat = 126, cellW = calW / 7, cellH: CGFloat = 15
@@ -757,6 +760,21 @@ while (y, m) <= (endYear, endMonth) {
     months.append((y, m))
     (y, m) = m == 12 ? (y + 1, 1) : (y, m + 1)
 }
+// Monate im Future Log: der Zeitraum plus die ersten Monate danach
+var futureMonths = months
+for _ in 0..<futureExtraMonths {
+    futureMonths.append((y, m))
+    (y, m) = m == 12 ? (y + 1, 1) : (y, m + 1)
+}
+// Future-Log-Seiten: je Kalenderquartal eine Seite (angebrochene Quartale am Anfang und Ende mit weniger Monaten)
+var futureGroups: [[Int]] = []
+for (i, fm) in futureMonths.enumerated() {
+    if i > 0, (futureMonths[i - 1].year, (futureMonths[i - 1].month - 1) / 3) == (fm.year, (fm.month - 1) / 3) {
+        futureGroups[futureGroups.count - 1].append(i)
+    } else {
+        futureGroups.append([i])
+    }
+}
 
 // Alle Wochen vom Montag vor dem ersten bis einschließlich zum letzten Tag des Zeitraums
 let firstDay = cal.date(from: DateComponents(year: months[0].year, month: months[0].month, day: 1))!
@@ -775,8 +793,8 @@ func weekIndex(of date: Date) -> Int { cal.dateComponents([.day], from: weeks[0]
 let indexPage = 1
 let rulesPage = indexPage + 1
 let goalsPage = rulesPage + 1
-let futureCount = (months.count + 2) / 3
-func futurePage(forMonth i: Int) -> Int { goalsPage + 1 + i / 3 }
+let futureCount = futureGroups.count
+func futurePage(forMonth i: Int) -> Int { goalsPage + 1 + futureGroups.firstIndex { $0.contains(i) }! }
 func monthPage(_ i: Int) -> Int { goalsPage + 1 + futureCount + i }
 func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
 let trackerPage = weekPage(weeks.count)
