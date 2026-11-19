@@ -65,7 +65,7 @@ Navigation über PDF-Links:
 - Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE, INDEX
 - Gewohnheit: KW-Beschriftungen (ab KW 44/2026) → Woche, INDEX
 - Collection: FUTURE, INDEX
-- Alle Seiten außer Deckblatt, Regeln und Gewohnheit: Knopf ✓ oben rechts (letzter Knopf der Leiste) → Gewohnheitsseite
+- Alle Seiten außer Deckblatt, Regeln und Gewohnheit: Knopf ✓ oben rechts (letzter Knopf der Leiste) → Gewohnheitsseite; auf Monats-, Wochen- und Daily-Seiten die des passenden Jahres, sonst die erste
 
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt oder
 kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
@@ -81,8 +81,8 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 5–10 | Future Log, ein Kalenderquartal pro Seite: Nov/Dez 2026, vier Quartale 2027, Jan–Mär 2028 (ohne Monatsseite) |
 | 11–24 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
 | 25–148 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
-| 149 | Gewohnheits-Tracker: eine Seite pro Gewohnheit (auf dem BOOX kopieren), je Kalenderjahr eine Spalte mit allen Wochen als Zeilen Mo–So |
-| 150–151 | Collections: leere Schreiblinie für das Thema, Punktraster |
+| 149–150 | Gewohnheits-Tracker 2026 und 2027: je Kalenderjahr eine Seite (pro Gewohnheit auf dem BOOX kopieren), alle Wochen des Jahres als Zeilen Mo–So in zwei Spalten |
+| 151–152 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
 Format 458,88 × 597,12 pt (3:4).
 

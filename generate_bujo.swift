@@ -82,6 +82,7 @@ var links: [(page: Int, rect: CGRect, target: Int)] = []
 var currentPage = 0
 var habitInNav = true   // Gewohnheits-Knopf ✓ als letzter Knopf in der Kopfzeile (pro Seite in page() gesetzt)
 let habitMark = "✓"
+var habitTarget = 0     // Gewohnheitsseite, auf die ✓ zeigt: die des Jahres der Seite (pro Seite gesetzt)
 
 func link(_ r: CGRect, to target: Int) { links.append((currentPage, r, target)) }
 
@@ -89,7 +90,7 @@ func link(_ r: CGRect, to target: Int) { links.append((currentPage, r, target)) 
 /// Gibt den linken Rand des ersten Knopfs zurück.
 @discardableResult
 func navButtons(_ ctx: CGContext, _ items: [(label: String, target: Int)], minWidth: CGFloat = 46) -> CGFloat {
-    let items = habitInNav ? items + [(habitMark, trackerPage)] : items
+    let items = habitInNav ? items + [(habitMark, habitTarget)] : items
     let f = font("AvenirNext-DemiBold", 7.5)
     let h: CGFloat = 17, gap: CGFloat = 5
     let widths = items.map { $0.label.count <= 1 ? 20 : max(minWidth, width(line($0.label, f, white, kern: 1)) + 16) }
@@ -120,6 +121,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
     let (year, month) = months[i]
     let first = cal.date(from: DateComponents(year: year, month: month, day: 1))!
     let days = cal.range(of: .day, in: .month, for: first)!.count
+    habitTarget = trackerPage(forYear: year)
 
     // Kopf: Monat und Jahr als Überschrift, rechts Navigation
     let titleFont = font("AvenirNext-Regular", 18)
@@ -337,8 +339,8 @@ func drawFuture(_ ctx: CGContext, page p: Int) {
     }
 }
 
-// 4) Gewohnheits-Tracker: eine Seite pro Gewohnheit, eine Spalte pro Kalenderjahr, alle Wochen als Zeilen (Mo–So)
-func drawTracker(_ ctx: CGContext) {
+// 4) Gewohnheits-Tracker: eine Seite pro Gewohnheit und Kalenderjahr, alle Wochen des Jahres in zwei Spalten (Mo–So)
+func drawTracker(_ ctx: CGContext, year yr: Int) {
     // Flacher Kopf mit kleiner Überschrift, damit mehr Platz für die Wochenzeilen bleibt
     let hMid: CGFloat = 14, hRule: CGFloat = 24, cBottom = H - 8
     let tf = font("AvenirNext-Regular", 11)
@@ -356,33 +358,30 @@ func drawTracker(_ ctx: CGContext) {
     strokeLine(ctx, margin, hRule, W - margin, hRule)
 
     // Legende: eine durchgehende Schreibzeile
-    label(ctx, "LEGENDE", x: cLeft, yMid: hRule + 9)
+    label(ctx, "LEGENDE", x: cLeft, yMid: hRule + 13)
     ctx.setStrokeColor(rule); ctx.setLineWidth(0.5)
-    strokeLine(ctx, cLeft + 50, hRule + 13, cRight, hRule + 13)
+    strokeLine(ctx, cLeft + 50, hRule + 17, cRight, hRule + 17)
 
-    // Pro Jahr alle Wochen (Montag), die mindestens einen Tag des Jahres enthalten
-    let years = Array(startYear...endYear)
-    let yearWeeks: [[Date]] = years.map { yr in
-        let jan1 = cal.date(from: DateComponents(year: yr, month: 1, day: 1))!
-        let dec31 = cal.date(from: DateComponents(year: yr, month: 12, day: 31))!
-        var w = cal.dateInterval(of: .weekOfYear, for: jan1)!.start, res: [Date] = []
-        while w <= dec31 { res.append(w); w = cal.date(byAdding: .day, value: 7, to: w)! }
-        return res
-    }
+    // Alle Wochen (Montag), die mindestens einen Tag des Jahres enthalten, auf zwei Spalten verteilt
+    let jan1 = cal.date(from: DateComponents(year: yr, month: 1, day: 1))!
+    let dec31 = cal.date(from: DateComponents(year: yr, month: 12, day: 31))!
+    var yearWeeks: [Date] = []
+    var w = cal.dateInterval(of: .weekOfYear, for: jan1)!.start
+    while w <= dec31 { yearWeeks.append(w); w = cal.date(byAdding: .day, value: 7, to: w)! }
+    let perCol = (yearWeeks.count + 1) / 2
+    let columns = [Array(yearWeeks[..<perCol]), Array(yearWeeks[perCol...])]
     let top = hRule + 22, yearH: CGFloat = 13, headH: CGFloat = 10, gap: CGFloat = 12
-    let perCol = yearWeeks.map(\.count).max()!
-    let colW = (cRight - cLeft - gap * CGFloat(years.count - 1)) / CGFloat(years.count), labW: CGFloat = 30
+    let colW = (cRight - cLeft - gap) / 2, labW: CGFloat = 34
     let cw = (colW - labW) / 7, rh = (cBottom - top - yearH - headH) / CGFloat(perCol)
-    let hf = font("Menlo-Bold", 6), nf = font("AvenirNext-Medium", 4.5), bf = font("AvenirNext-Bold", 4.5)
-    let kf = font("AvenirNext-DemiBold", 5.8), yf = font("AvenirNext-DemiBold", 9)
+    let hf = font("Menlo-Bold", 6), nf = font("AvenirNext-Medium", 4.8), bf = font("AvenirNext-Bold", 4.8)
+    let kf = font("AvenirNext-DemiBold", 6.5), yf = font("AvenirNext-DemiBold", 9)
     let outside = CGColor(gray: 0.82, alpha: 1)
 
-    for (col, yr) in years.enumerated() {
+    ctx.setFillColor(dark)
+    pill(ctx, rect(cLeft, top, cRight - cLeft, yearH - 2), radius: 2.5)
+    drawCentered(ctx, String(yr), f: yf, color: white, cx: (cLeft + cRight) / 2, yMid: top + (yearH - 2) / 2, kern: 2)
+    for (col, rows) in columns.enumerated() {
         let bx = cLeft + CGFloat(col) * (colW + gap), x0 = bx + labW, gt = top + yearH
-        ctx.setFillColor(dark)
-        pill(ctx, rect(bx, top, colW, yearH - 2), radius: 2.5)
-        drawCentered(ctx, String(yr), f: yf, color: white, cx: bx + colW / 2, yMid: top + (yearH - 2) / 2, kern: 2)
-        let rows = yearWeeks[col]
         for (k, l) in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].enumerated() {
             if k >= 5 {
                 ctx.setFillColor(light)
@@ -407,13 +406,13 @@ func drawTracker(_ ctx: CGContext) {
                 let dn = cal.component(.day, from: day)
                 if dn == 1 {
                     let mon = String(monthNames[cal.component(.month, from: day) - 1].prefix(3))
-                    drawText(ctx, line("1. \(mon)", bf, black), x: cell.minX + 1.2, yMid: y + 3.3, f: bf)
+                    drawText(ctx, line("1. \(mon)", bf, black), x: cell.minX + 1.5, yMid: y + 3.8, f: bf)
                     ctx.setStrokeColor(black); ctx.setLineWidth(1.2)
                     strokeLine(ctx, cell.minX, y, cell.minX, y + rh)
                     strokeLine(ctx, cell.minX, y, x0 + 7 * cw, y)
                     if k > 0 { strokeLine(ctx, x0, y + rh, cell.minX, y + rh) }
                 } else {
-                    drawText(ctx, line(String(dn), nf, black), x: cell.minX + 1.2, yMid: y + 3.3, f: nf)
+                    drawText(ctx, line(String(dn), nf, black), x: cell.minX + 1.5, yMid: y + 3.8, f: nf)
                 }
             }
             ctx.setStrokeColor(rule); ctx.setLineWidth(0.4)
@@ -475,6 +474,7 @@ func futurePage(forWeek days: [Date]) -> Int {
 func drawWeekDaily(_ ctx: CGContext, index wi: Int) {
     let monday = weeks[wi]
     let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: monday)! }
+    habitTarget = trackerPage(forYear: cal.component(.yearForWeekOfYear, from: monday))
     let nav = [("KW \(cal.component(.weekOfYear, from: monday))", weekPage(wi))] + monthButtons(days)
         + [("FUTURE", futurePage(forWeek: days)), ("INDEX", indexPage)]
     let navLeft = navButtons(ctx, nav, minWidth: 34)
@@ -504,6 +504,7 @@ func drawCollection(_ ctx: CGContext) {
 func drawWeek(_ ctx: CGContext, index wi: Int) {
     let monday = weeks[wi]
     let days = (0..<7).map { cal.date(byAdding: .day, value: $0, to: monday)! }
+    habitTarget = trackerPage(forYear: cal.component(.yearForWeekOfYear, from: monday))
 
     // Kopf: KW und Datumsbereich, rechts Navigation (Vor-/Folgewoche, berührte Monate, Index)
     let titleFont = font("AvenirNext-Regular", 18)
@@ -756,6 +757,7 @@ func page(habit: Bool = true, _ draw: (CGContext) -> Void) {
     ctx.setFillColor(white)
     ctx.fill(mediaBox)
     habitInNav = habit
+    habitTarget = trackerPage(forYear: startYear)
     draw(ctx)
     ctx.endPDFPage()
     currentPage += 1
@@ -806,7 +808,8 @@ func futurePage(forMonth i: Int) -> Int { goalsPage + 1 + futureGroups.firstInde
 func monthPage(_ i: Int) -> Int { goalsPage + 1 + futureCount + i }
 func weekPage(_ i: Int) -> Int { monthPage(months.count) + 2 * i }
 let trackerPage = weekPage(weeks.count)
-let collectionPage = trackerPage + 1
+func trackerPage(forYear y: Int) -> Int { trackerPage + y - startYear }
+let collectionPage = trackerPage(forYear: endYear) + 1
 
 page(habit: false, drawCover)
 page(drawIndex)
@@ -818,7 +821,7 @@ for i in weeks.indices {
     page { drawWeek($0, index: i) }
     page { drawWeekDaily($0, index: i) }
 }
-page(habit: false, drawTracker)
+for y in startYear...endYear { page(habit: false) { drawTracker($0, year: y) } }
 page(drawCollection)
 page(drawCollection)
 ctx.closePDF()
