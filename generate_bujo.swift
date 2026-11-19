@@ -499,7 +499,7 @@ func drawCollection(_ ctx: CGContext) {
     dots(ctx, x0: cLeft, y0: cTop, x1: cRight, y1: cBottom)
 }
 
-// MARK: - Wochenseite (Aufbau wie "Weekly Rolling.pdf": Aufgaben + Mo–So + Next, Stil wie Monatsseite)
+// MARK: - Wochenseite (Alastair-Methode: Mo–So + Next links, Bullet-Spalte, Aufgaben rechts; Stil wie Monatsseite)
 
 func drawWeek(_ ctx: CGContext, index wi: Int) {
     let monday = weeks[wi]
@@ -527,20 +527,22 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)
 
+    // Tagesraster links (Alastair-Methode): • geplant, × erledigt, > verschoben; dann Bullet-Spalte und Aufgabentext
     let top = contentTop, bottom = H - margin
-    let rows = 21, colW: CGFloat = 22, headH: CGFloat = 24, box: CGFloat = 14
-    let taskRight = W - margin - 8 * colW
+    let rows = 25, colW: CGFloat = 21, headH: CGFloat = 24, bulletW: CGFloat = 14
+    let gridX = margin, gridW = 8 * colW
+    let taskX = gridX + gridW + 6 + bulletW
     let rowH = (bottom - top - headH) / CGFloat(rows)
 
-    // Spaltenköpfe, Wochenende grau hinterlegt
+    // Spaltenköpfe; Werktage abwechselnd grau (Di, Do), Wochenende grau
     let headFont = font("AvenirNext-DemiBold", 7.5)
-    drawText(ctx, line("AUFGABEN", headFont, dark, kern: 1.2), x: margin, yMid: top + headH / 2, f: headFont)
+    drawText(ctx, line("AUFGABEN", headFont, dark, kern: 1.2), x: taskX + 2, yMid: top + headH / 2, f: headFont)
     let dayFont = font("Menlo-Bold", 7), dateFont = font("AvenirNext-Medium", 6.5)
     for (i, label) in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So", "Nx"].enumerated() {
-        let x = taskRight + CGFloat(i) * colW
-        if i == 5 || i == 6 {
+        let x = gridX + CGFloat(i) * colW
+        if i == 1 || i == 3 || i >= 5 && i < 7 {
             ctx.setFillColor(light)
-            ctx.fill(rect(x + 1, top, colW - 2, bottom - top))
+            ctx.fill(rect(x, top, colW, bottom - top))
         }
         if i < 7 {
             drawCentered(ctx, label, f: dayFont, color: black, cx: x + colW / 2, yMid: top + 7)
@@ -553,20 +555,19 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     ctx.setLineWidth(0.8)
     strokeLine(ctx, margin, top + headH, W - margin, top + headH)
 
-    // Zeilen: Schreiblinie links, Abhak-Kästchen rechts
-    for r in 0..<rows {
+    // Trennlinien nur vor Nx, vor der Bullet-Spalte und vor dem Aufgabentext
+    ctx.setStrokeColor(rule)
+    ctx.setLineWidth(0.6)
+    strokeLine(ctx, gridX + 7 * colW, top + headH, gridX + 7 * colW, bottom)
+    ctx.setLineWidth(0.3)
+    strokeLine(ctx, gridX + gridW, top + headH, gridX + gridW, bottom)
+    strokeLine(ctx, taskX - 2, top + headH, taskX - 2, bottom)
+
+    // Zeilen: durchgehende Linie
+    ctx.setLineWidth(0.5)
+    for r in 1...rows {
         let y = top + headH + CGFloat(r) * rowH
-        ctx.setStrokeColor(rule)
-        ctx.setLineWidth(0.5)
-        strokeLine(ctx, margin, y + rowH, taskRight - 4, y + rowH)
-        ctx.setStrokeColor(dark)
-        ctx.setLineWidth(0.6)
-        for i in 0..<8 {
-            let cx = taskRight + (CGFloat(i) + 0.5) * colW, cy = y + rowH / 2
-            let b = rect(cx - box / 2, cy - box / 2, box, box)
-            ctx.addPath(CGPath(roundedRect: b, cornerWidth: 2.4, cornerHeight: 2.4, transform: nil))
-            ctx.strokePath()
-        }
+        strokeLine(ctx, margin, y, W - margin, y)
     }
 }
 
@@ -649,8 +650,9 @@ func drawRules(_ ctx: CGContext) {
         ("MONAT", "**Die Monatsseite ist das Future Log der Wochen.** Links an den Tag: Termine und Fristen dieses Monats, "
             + "**feste Termine** auch Monate im Voraus. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen. "
             + "Rechts unten: konkrete Aufgaben des Monats. **Aktive Collections mit Aufgaben** hier vermerken."),
-        ("WOCHE", "Aufgaben und Termine **dieser Woche**, per Kästchen auf Tage verteilt. **Ausgefülltes Kästchen** = Ereignis, "
-            + "das andere Aktivitäten blockieren kann. **Nx** = Aktivitäten, die sich in der Folgewoche fortsetzen."),
+        ("WOCHE", "Aufgaben und Termine **dieser Woche**. In den Tagesspalten: **•** geplant, **×** erledigt, **>** verschoben "
+            + "(am neuen Tag •), **○** Termin; "
+            + "daneben das Bullet der Aufgabe. **Nx** = geht in der Folgewoche weiter."),
         ("DAILY", "Tageslog: Datum als Überschrift, dann kurz mit Bullets notieren. **Stimmungen mit =**, "
             + "gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert."),
         ("COLLECTION", "Alles **ohne Datum**: Ideen, Listen, Projekte, Recherchen. Neue Collection sofort in den Index eintragen."),

@@ -37,7 +37,7 @@ Eine durchgestrichene Aufgabe ist hinfällig.
 
 - Future Log: Fristen und Vorhaben ohne festen Tag ab dem nächsten Monat, unter den Monat; feste Termine gleich auf die Monatsseite. Auch aktive Collections mit Aufgaben vermerken.
 - Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats, feste Termine auch Monate im Voraus. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen; rechts unten: konkrete Aufgaben des Monats. Aktive Collections mit Aufgaben hier vermerken.
-- Woche: Aufgaben und Termine dieser Woche, per Kästchen auf Tage verteilt. Ausgefülltes Kästchen = Ereignis, das andere Aktivitäten blockieren kann. Nx = Aktivitäten, die sich in der Folgewoche fortsetzen.
+- Woche: Aufgaben und Termine dieser Woche. In den Tagesspalten: • geplant, × erledigt, > verschoben (am neuen Tag •), ○ Termin; daneben das Bullet der Aufgabe. Nx = geht in der Folgewoche weiter.
 - Daily: Tageslog mit Datum als Überschrift, kurz mit Bullets. Stimmungen mit =, gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert.
 - Collection: alles ohne Datum (Ideen, Listen, Projekte); neue Collections in den Index eintragen.
 - Gewohnheit: was sich regelmäßig wiederholt, eine Seite pro Gewohnheit.
@@ -80,7 +80,7 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 4 | Jahresziele: sechs Lebensbereiche mit Zufriedenheit 1–10 und Zielen, darunter nach kurz / mittel / lang sortieren |
 | 5–10 | Future Log, ein Kalenderquartal pro Seite: Nov/Dez 2026, vier Quartale 2027, Jan–Mär 2028 (ohne Monatsseite) |
 | 11–24 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
-| 25–148 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite (Aufgaben, Mo–So mit Datum, Next) und Wochen-Daily (Datumsbereich, Punktraster) |
+| 25–148 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite nach der Alastair-Methode (Spalten Mo–So mit Datum und Nx links, Bullet-Spalte, Aufgaben) und Wochen-Daily (Datumsbereich, Punktraster) |
 | 149–150 | Gewohnheits-Tracker 2026 und 2027: je Kalenderjahr eine Seite (pro Gewohnheit auf dem BOOX kopieren), alle Wochen des Jahres als Zeilen Mo–So in zwei Spalten |
 | 151–152 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
