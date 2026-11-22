@@ -160,24 +160,26 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
         ctx.setLineWidth(0.5)
         strokeLine(ctx, listX, y + rowH, listX + listW, y + rowH)
 
+        // Tagesnummer im eckigen Kasten wie die KW-Knöpfe: Werktage gefüllt, Wochenende umrandet
         let circle = rect(listX + 1, mid - diam / 2, diam, diam)
         if weekend {
             ctx.setStrokeColor(dark)
             ctx.setLineWidth(0.8)
-            ctx.strokeEllipse(in: circle.insetBy(dx: 0.4, dy: 0.4))
+            ctx.addPath(CGPath(roundedRect: circle.insetBy(dx: 0.4, dy: 0.4), cornerWidth: 3, cornerHeight: 3, transform: nil))
+            ctx.strokePath()
         } else {
             ctx.setFillColor(dark)
-            ctx.fillEllipse(in: circle)
+            pill(ctx, circle, radius: 3)
         }
         drawCentered(ctx, String(d), f: numFont, color: weekend ? dark : white, cx: circle.midX, yMid: mid)
         drawText(ctx, line(weekdayShort[wd - 1], dayFont, black), x: listX + diam + 4, yMid: mid, f: dayFont)
 
         if wd == 2 || d == 1 {
-            // KW-Badge verlinkt auf die Wochenseite
+            // KW-Badge in Größe der Tageskreise, Ecken wie die KW-Spaltenköpfe; verlinkt auf die Wochenseite
             let kw = cal.component(.weekOfYear, from: date)
             let bw: CGFloat = 17
             ctx.setFillColor(dark)
-            pill(ctx, rect(listX + listW - bw - 1, mid - diam / 2, bw, diam), radius: diam / 2)
+            pill(ctx, rect(listX + listW - bw - 1, mid - diam / 2, bw, diam), radius: 3)
             drawCentered(ctx, String(kw), f: kwFont, color: white, cx: listX + listW - bw / 2 - 1, yMid: mid)
             link(rect(listX + listW - bw - 5, y, bw + 5, rowH), to: weekPage(weekIndex(of: date)))
         }
@@ -186,18 +188,76 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
     ctx.setLineWidth(0.5)
     strokeLine(ctx, listX, top, listX + listW, top)
 
-    // Rechts: Punktraster
-    let gridX0 = listX + listW + 12, gridX1 = W - margin
-    let cols = Int((gridX1 - gridX0) / dotSpacing), rows = Int((bottom - top) / dotSpacing)
-    let offX = gridX0 + ((gridX1 - gridX0) - CGFloat(cols) * dotSpacing) / 2
-    let offY = top + ((bottom - top) - CGFloat(rows) * dotSpacing) / 2
-    ctx.setFillColor(gridDot)
-    let r: CGFloat = 0.65
-    for i in 0...cols {
-        for j in 0...rows {
-            let x = offX + CGFloat(i) * dotSpacing, y = offY + CGFloat(j) * dotSpacing
-            ctx.fillEllipse(in: rect(x - r, y - r, 2 * r, 2 * r))
+    // Rechts neben der Tagesliste (Alastair): Freitext, dann die leere Spalte und je KW eine Spalte am rechten Rand
+    let last = cal.date(from: DateComponents(year: year, month: month, day: days))!
+    var mondays: [Date] = []
+    var w = cal.dateInterval(of: .weekOfYear, for: first)!.start
+    while w <= last {
+        mondays.append(w)
+        w = cal.date(byAdding: .day, value: 7, to: w)!
+    }
+    let kwCols = mondays.map { mo in
+        AlastairCol(w: dotSpacing, grey: nil, head: pillHead(String(cal.component(.weekOfYear, from: mo)), target: weekPage(weekIndex(of: mo)), font: kwFont))
+    }
+    let offen = AlastairCol(w: dotSpacing, grey: nil, head: offenHead)
+    alastairBlock(ctx, [offen] + kwCols, left: false, x0: listX + listW + 12, x1: W - margin, top: top, headH: 16, bottom: bottom)
+}
+
+// MARK: - Alastair-Spaltenblock: Spalten links oder rechts vom Fließtext
+
+struct AlastairCol {
+    let w: CGFloat
+    let grey: Bool?                       // nil: nach Abstand zum Text (am Text grau, dann abwechselnd)
+    let head: (CGContext, CGRect) -> Void // Kopf in der Spalte zeichnen
+}
+
+/// Spalten in Leserichtung (links → rechts). Bei left stehen sie am linken Rand, sonst am rechten.
+/// Zeichnet Grau, Köpfe und das Punktraster (auf den Spaltengrenzen); gibt den Textbereich zurück.
+@discardableResult
+func alastairBlock(_ ctx: CGContext, _ cols: [AlastairCol], left: Bool, x0: CGFloat, x1: CGFloat, top: CGFloat, headH: CGFloat, bottom: CGFloat) -> (CGFloat, CGFloat) {
+    let total = cols.reduce(0) { $0 + $1.w }
+    let start = left ? x0 : x1 - total
+    var x = start
+    for (k, c) in cols.enumerated() {
+        let d = left ? cols.count - 1 - k : k
+        if c.grey ?? (d % 2 == 0) {
+            ctx.setFillColor(light)
+            ctx.fill(rect(x, top, c.w, bottom - top))
         }
+        c.head(ctx, rect(x, top, c.w, headH))
+        x += c.w
+    }
+    let boundary = left ? start + total : start
+    ctx.setFillColor(gridDot)
+    var bx = boundary
+    while bx - dotSpacing >= x0 - 0.1 { bx -= dotSpacing }
+    var py = top + headH + dotSpacing / 2
+    while py <= bottom {
+        var px = bx
+        while px <= x1 + 0.1 {
+            ctx.fillEllipse(in: rect(px - 0.65, py - 0.65, 1.3, 1.3))
+            px += dotSpacing
+        }
+        py += dotSpacing
+    }
+    return left ? (start + total, x1) : (x0, start)
+}
+
+func offenHead(_ ctx: CGContext, _ r: CGRect) {
+    let b = CGRect(x: r.minX + 0.75, y: r.maxY - 2 - 12, width: r.width - 1.5, height: 12)
+    ctx.setStrokeColor(dark)
+    ctx.setLineWidth(0.8)
+    ctx.addPath(CGPath(roundedRect: b.insetBy(dx: 0.4, dy: 0.4), cornerWidth: 3, cornerHeight: 3, transform: nil))
+    ctx.strokePath()
+}
+
+func pillHead(_ text: String, target: Int?, font f: CTFont) -> (CGContext, CGRect) -> Void {
+    return { ctx, r in
+        let b = CGRect(x: r.minX + 0.75, y: r.maxY - 2 - 12, width: r.width - 1.5, height: 12)
+        ctx.setFillColor(dark)
+        pill(ctx, b, radius: 3)
+        drawCentered(ctx, text, f: f, color: white, cx: b.midX, yMid: H - b.midY, kern: 0.6)
+        if let t = target { link(b, to: t) }
     }
 }
 
@@ -315,34 +375,14 @@ func drawFuture(_ ctx: CGContext, page p: Int) {
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)
 
-    // Monatsspalten: je zwei Punktabstände breit; die letzte grau, davon aus abwechselnd
-    let top = cTop + 2, headH: CGFloat = 20, colW = 2 * dotSpacing
+    // Spalten links (Alastair): je Monat zwei Punktabstände, die leere Spalte am Text
     let pf = font("AvenirNext-DemiBold", 7)
-    for (k, mi) in group.enumerated() {
-        let m = futureMonths[mi].month
-        let x = cLeft + CGFloat(k) * colW
-        if (group.count - 1 - k) % 2 == 0 {
-            ctx.setFillColor(light)
-            ctx.fill(rect(x, top, colW, cBottom - top))
-        }
-        let r = rect(x + 1.5, top + 2, colW - 3, 13)
-        ctx.setFillColor(dark)
-        pill(ctx, r, radius: 3)
-        drawCentered(ctx, String(monthNames[m - 1].prefix(3)), f: pf, color: white, cx: r.midX, yMid: top + 8.5, kern: 0.8)
-        if mi < months.count { link(r, to: monthPage(mi)) }   // Monate nach dem Zeitraum haben keine Monatsseite
+    let monthCols = group.map { mi in
+        AlastairCol(w: 2 * dotSpacing, grey: nil,
+                    head: pillHead(String(monthNames[futureMonths[mi].month - 1].prefix(3)), target: mi < months.count ? monthPage(mi) : nil, font: pf))
     }
-
-    // Punktraster am linken Rand ausgerichtet, damit die Punkte mittig in den Monatsspalten liegen
-    ctx.setFillColor(gridDot)
-    var py = top + headH + dotSpacing / 2
-    while py <= cBottom {
-        var px = cLeft + dotSpacing / 2
-        while px <= cRight {
-            ctx.fillEllipse(in: rect(px - 0.65, py - 0.65, 1.3, 1.3))
-            px += dotSpacing
-        }
-        py += dotSpacing
-    }
+    let offen = AlastairCol(w: dotSpacing, grey: nil, head: offenHead)
+    alastairBlock(ctx, monthCols + [offen], left: true, x0: cLeft, x1: cRight, top: cTop + 2, headH: 20, bottom: cBottom)
 }
 
 // 4) Gewohnheits-Tracker: eine Seite pro Gewohnheit und Kalenderjahr, alle Wochen des Jahres in zwei Spalten (Mo–So)
@@ -533,48 +573,22 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)
 
-    // Tagesraster links (Alastair-Methode): • geplant, × erledigt, > verschoben; dann Bullet-Spalte und Aufgabentext
+    // Spalten links (Alastair), je ein Punktabstand: Mo–So und die leere Spalte am Text;
+    // leere Spalte grau, Wochenende weiß, Mo/Mi/Fr grau
     let top = contentTop, bottom = H - margin
-    let rows = 25, colW: CGFloat = 21, headH: CGFloat = 24, bulletW: CGFloat = 14
-    let gridX = margin, gridW = 8 * colW
-    let taskX = gridX + gridW + 6 + bulletW
-    let rowH = (bottom - top - headH) / CGFloat(rows)
-
-    // Spaltenköpfe; Werktage abwechselnd grau (Di, Do), Wochenende grau
-    let headFont = font("AvenirNext-DemiBold", 7.5)
-    drawText(ctx, line("AUFGABEN", headFont, dark, kern: 1.2), x: taskX + 2, yMid: top + headH / 2, f: headFont)
-    let dayFont = font("Menlo-Bold", 7), dateFont = font("AvenirNext-Medium", 6.5)
-    for (i, label) in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So", "Nx"].enumerated() {
-        let x = gridX + CGFloat(i) * colW
-        if i == 1 || i == 3 || i >= 5 && i < 7 {
-            ctx.setFillColor(light)
-            ctx.fill(rect(x, top, colW, bottom - top))
-        }
-        if i < 7 {
-            drawCentered(ctx, label, f: dayFont, color: black, cx: x + colW / 2, yMid: top + 7)
-            drawCentered(ctx, String(cal.component(.day, from: days[i])), f: dateFont, color: dark, cx: x + colW / 2, yMid: top + 17)
-        } else {
-            drawCentered(ctx, label, f: dayFont, color: black, cx: x + colW / 2, yMid: top + headH / 2)
-        }
+    let dateFont = font("AvenirNext-Medium", 6)
+    let dayCols = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].enumerated().map { (i, label) in
+        AlastairCol(w: dotSpacing, grey: [0, 2, 4].contains(i), head: { ctx, r in
+            // Tagesknopf wie die KW- und Monatsknöpfe, darunter das Datum
+            let b = CGRect(x: r.minX + 0.75, y: r.maxY - 2 - 12, width: r.width - 1.5, height: 12)
+            ctx.setFillColor(dark)
+            pill(ctx, b, radius: 3)
+            drawCentered(ctx, label, f: font("AvenirNext-DemiBold", 6.5), color: white, cx: b.midX, yMid: top + 8)
+            drawCentered(ctx, String(cal.component(.day, from: days[i])), f: dateFont, color: dark, cx: r.midX, yMid: top + 19)
+        })
     }
-    ctx.setStrokeColor(dark)
-    ctx.setLineWidth(0.8)
-    strokeLine(ctx, margin, top + headH, W - margin, top + headH)
-
-    // Trennlinien nur vor Nx, vor der Bullet-Spalte und vor dem Aufgabentext
-    ctx.setStrokeColor(rule)
-    ctx.setLineWidth(0.6)
-    strokeLine(ctx, gridX + 7 * colW, top + headH, gridX + 7 * colW, bottom)
-    ctx.setLineWidth(0.3)
-    strokeLine(ctx, gridX + gridW, top + headH, gridX + gridW, bottom)
-    strokeLine(ctx, taskX - 2, top + headH, taskX - 2, bottom)
-
-    // Zeilen: durchgehende Linie
-    ctx.setLineWidth(0.5)
-    for r in 1...rows {
-        let y = top + headH + CGFloat(r) * rowH
-        strokeLine(ctx, margin, y, W - margin, y)
-    }
+    let offen = AlastairCol(w: dotSpacing, grey: true, head: offenHead)
+    alastairBlock(ctx, dayCols + [offen], left: true, x0: margin, x1: W - margin, top: top, headH: 24, bottom: bottom)
 }
 
 // MARK: - Regelseite (nach dem Index): Bullets, was wohin, Migrationsrhythmus, Faustregeln
@@ -643,6 +657,9 @@ func drawRules(_ ctx: CGContext) {
     }
     y += CGFloat(bullets.map(\.count).max()!) * rowH + 2
     y += paragraph(ctx, "Aufgabe **durchgestrichen** = hinfällig.",
+                   x: cLeft, y: y, w: cRight - cLeft) + 4
+    y += paragraph(ctx, "**Leere Spalte** (Future Log, Monat, Woche): was außerhalb dieses Zeitraums passiert. **•** noch offen, "
+                   + "**>** nächster Zeitraum oder Collection, **<** zurück auf Monat / Future Log, **×** erledigt ohne festen Tag.",
                    x: cLeft, y: y, w: cRight - cLeft) + 10
 
     // Was wohin: vom Langfristigen zum Heute
@@ -653,10 +670,9 @@ func drawRules(_ ctx: CGContext) {
         ("FUTURE LOG", "Fristen und Vorhaben **ohne festen Tag** ab dem nächsten Monat als Liste, Bullet in die **Spalte des Monats**; "
             + "**feste Termine** gleich auf die Monatsseite. Auch **aktive Collections mit Aufgaben** vermerken."),
         ("MONAT", "**Die Monatsseite ist das Future Log der Wochen.** Links an den Tag: Termine und Fristen dieses Monats, "
-            + "**feste Termine** auch Monate im Voraus. Rechts oben: Projekte, Themen und **aktive Collections**, "
-            + "die weitere Aufgaben enthalten können. Rechts unten: Aufgaben des Monats, die noch keiner Woche zugeordnet sind."),
-        ("WOCHE", "Aufgaben und Termine **dieser Woche** als Liste, Bullet in die **Spalte des Tages**; daneben das Bullet "
-            + "der Aufgabe. **Nx** = geht in der Folgewoche weiter."),
+            + "**feste Termine** auch Monate im Voraus. Rechts als Liste: Projekte, Themen, **aktive Collections** "
+            + "und Aufgaben des Monats, Bullet in die **Spalte der Woche**."),
+        ("WOCHE", "Aufgaben und Termine **dieser Woche** als Liste, Bullet in die **Spalte des Tages**."),
         ("DAILY", "Tageslog: Datum als Überschrift, dann kurz mit Bullets notieren. **Stimmungen mit =**, "
             + "gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert."),
         ("COLLECTION", "Alles **ohne Datum**: Ideen, Listen, Projekte, Recherchen. Neue Collection sofort in den Index eintragen."),
