@@ -359,9 +359,13 @@ func drawIndex(_ ctx: CGContext) {
     let ef = font("AvenirNext-Regular", 9.5)
     for (r, (text, target)) in entries.prefix(rows).enumerated() {
         let rowTop = cTop + headH + CGFloat(r) * rowH
-        drawText(ctx, line(text, ef, black), x: cLeft + 2, yMid: rowTop + rowH / 2 + 1, f: ef)
-        drawText(ctx, line("›", ef, dark), x: cLeft + colW - 44 - 10, yMid: rowTop + rowH / 2 + 1, f: ef)
-        link(rect(cLeft, rowTop, colW - 44, rowH), to: target)
+        // verlinkter Eintrag: Text im dunklen Kasten
+        let tl = line(text, ef, white)
+        let b = rect(cLeft + 1, rowTop + 3, width(tl) + 12, rowH - 6)
+        ctx.setFillColor(dark)
+        pill(ctx, b, radius: 3)
+        drawText(ctx, tl, x: cLeft + 7, yMid: rowTop + rowH / 2 + 0.5, f: ef)
+        link(b, to: target)
     }
 }
 
@@ -446,9 +450,17 @@ func drawTracker(_ ctx: CGContext, year yr: Int) {
         }
         for (r, monday) in rows.enumerated() {
             let y = gt + headH + CGFloat(r) * rh
-            drawText(ctx, line("KW \(cal.component(.weekOfYear, from: monday))", kf, dark, kern: 0.3), x: bx, yMid: y + rh / 2, f: kf)
-            // Nur Wochen im Zeitraum haben eine Wochenseite
-            if let wi = weeks.firstIndex(of: monday) { link(rect(bx, y, labW - 4, rh), to: weekPage(wi)) }
+            // Nur Wochen im Zeitraum haben eine Wochenseite: dann KW im dunklen Kasten, sonst nur Schrift
+            let kwText = "KW \(cal.component(.weekOfYear, from: monday))"
+            if let wi = weeks.firstIndex(of: monday) {
+                let b = rect(bx, y + 2, labW - 6, rh - 4)
+                ctx.setFillColor(dark)
+                pill(ctx, b, radius: 3)
+                drawCentered(ctx, kwText, f: kf, color: white, cx: b.midX, yMid: y + rh / 2, kern: 0.3)
+                link(b, to: weekPage(wi))
+            } else {
+                drawText(ctx, line(kwText, kf, dark, kern: 0.3), x: bx, yMid: y + rh / 2, f: kf)
+            }
             for k in 0..<7 {
                 let day = cal.date(byAdding: .day, value: k, to: monday)!
                 let cell = rect(x0 + CGFloat(k) * cw, y, cw, rh)
