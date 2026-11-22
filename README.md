@@ -71,10 +71,12 @@ Navigation über PDF-Links:
 - Collection: FUTURE, INDEX
 - Alle Seiten außer Deckblatt, Regeln und Gewohnheit: Knopf ✓ oben rechts (letzter Knopf der Leiste) → Gewohnheitsseite; auf Monats-, Wochen- und Daily-Seiten die des passenden Jahres, sonst die erste
 
+Was verlinkt ist, steht in einem dunklen Kasten; nicht verlinkte Beschriftungen sind nur Schrift.
+
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt oder
 kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 
-## Inhalt von `BuJo-2027 V4.1.pdf`
+## Inhalt von `BuJo-2027 V4.2.pdf`
 
 | Seiten | Inhalt |
 |---|---|

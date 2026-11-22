@@ -16,7 +16,7 @@ let endYear = 2027, endMonth = 12
 let futureExtraMonths = 3   // Future Log reicht so viele Monate über das Ende hinaus (ohne Monatsseite)
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "BuJo-2027 V4.1.pdf"
+    : "BuJo-2027 V4.2.pdf"
 
 // Seitenformat wie der Original-Planer (OnPlanners, vertikal)
 let W: CGFloat = 458.88, H: CGFloat = 597.12
@@ -141,7 +141,6 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
     let top = contentTop, bottom = H - margin
     let rowH = (bottom - top) / CGFloat(days)
     let diam = min(rowH - 3, 14)
-    let numFont = font("AvenirNext-Medium", 7.5)
     let dayFont = font("Menlo-Regular", 7.5)
     let kwFont = font("AvenirNext-DemiBold", 7)
 
@@ -160,18 +159,9 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
         ctx.setLineWidth(0.5)
         strokeLine(ctx, listX, y + rowH, listX + listW, y + rowH)
 
-        // Tagesnummer im eckigen Kasten wie die KW-Knöpfe: Werktage gefüllt, Wochenende umrandet
+        // Tagesnummer nicht verlinkt: nur Schrift (Wochenende über die graue Zeile erkennbar)
         let circle = rect(listX + 1, mid - diam / 2, diam, diam)
-        if weekend {
-            ctx.setStrokeColor(dark)
-            ctx.setLineWidth(0.8)
-            ctx.addPath(CGPath(roundedRect: circle.insetBy(dx: 0.4, dy: 0.4), cornerWidth: 3, cornerHeight: 3, transform: nil))
-            ctx.strokePath()
-        } else {
-            ctx.setFillColor(dark)
-            pill(ctx, circle, radius: 3)
-        }
-        drawCentered(ctx, String(d), f: numFont, color: weekend ? dark : white, cx: circle.midX, yMid: mid)
+        drawCentered(ctx, String(d), f: font("AvenirNext-DemiBold", 7.5), color: black, cx: circle.midX, yMid: mid)
         drawText(ctx, line(weekdayShort[wd - 1], dayFont, black), x: listX + diam + 4, yMid: mid, f: dayFont)
 
         if wd == 2 || d == 1 {
@@ -197,7 +187,7 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
         w = cal.date(byAdding: .day, value: 7, to: w)!
     }
     let kwCols = mondays.map { mo in
-        AlastairCol(w: dotSpacing, grey: nil, head: pillHead(String(cal.component(.weekOfYear, from: mo)), target: weekPage(weekIndex(of: mo)), font: kwFont))
+        AlastairCol(w: dotSpacing, grey: nil, boxed: true, head: pillHead(String(cal.component(.weekOfYear, from: mo)), target: weekPage(weekIndex(of: mo)), font: kwFont))
     }
     let offen = AlastairCol(w: dotSpacing, grey: nil, head: offenHead)
     alastairBlock(ctx, [offen] + kwCols, left: false, x0: listX + listW + 12, x1: W - margin, top: top, headH: 16, bottom: bottom)
@@ -205,9 +195,12 @@ func drawMonth(_ ctx: CGContext, index i: Int) {
 
 // MARK: - Alastair-Spaltenblock: Spalten links oder rechts vom Fließtext
 
+// Regel: Was verlinkt ist, steht in einem dunklen Kasten (Grau der Spalte erst unter dem Kopf);
+// was nicht verlinkt ist, ist nur Schrift (Grau der Spalte bis ganz oben).
 struct AlastairCol {
     let w: CGFloat
     let grey: Bool?                       // nil: nach Abstand zum Text (am Text grau, dann abwechselnd)
+    var boxed = false                     // Kopf ist ein verlinkter Kasten
     let head: (CGContext, CGRect) -> Void // Kopf in der Spalte zeichnen
 }
 
@@ -221,8 +214,9 @@ func alastairBlock(_ ctx: CGContext, _ cols: [AlastairCol], left: Bool, x0: CGFl
     for (k, c) in cols.enumerated() {
         let d = left ? cols.count - 1 - k : k
         if c.grey ?? (d % 2 == 0) {
+            let gy = c.boxed ? top + headH : top
             ctx.setFillColor(light)
-            ctx.fill(rect(x, top, c.w, bottom - top))
+            ctx.fill(rect(x, gy, c.w, bottom - gy))
         }
         c.head(ctx, rect(x, top, c.w, headH))
         x += c.w
@@ -231,21 +225,22 @@ func alastairBlock(_ ctx: CGContext, _ cols: [AlastairCol], left: Bool, x0: CGFl
     return left ? (start + total, x1) : (x0, start)
 }
 
+/// Kopf der leeren Spalte: nicht verlinkt, daher nur ein Strich
 func offenHead(_ ctx: CGContext, _ r: CGRect) {
-    let b = CGRect(x: r.minX + 0.75, y: r.maxY - 2 - 12, width: r.width - 1.5, height: 12)
-    ctx.setStrokeColor(dark)
-    ctx.setLineWidth(0.8)
-    ctx.addPath(CGPath(roundedRect: b.insetBy(dx: 0.4, dy: 0.4), cornerWidth: 3, cornerHeight: 3, transform: nil))
-    ctx.strokePath()
+    drawCentered(ctx, "–", f: font("Menlo-Bold", 7), color: black, cx: r.midX, yMid: H - (r.maxY - 8))
 }
 
 func pillHead(_ text: String, target: Int?, font f: CTFont) -> (CGContext, CGRect) -> Void {
     return { ctx, r in
         let b = CGRect(x: r.minX + 0.75, y: r.maxY - 2 - 12, width: r.width - 1.5, height: 12)
-        ctx.setFillColor(dark)
-        pill(ctx, b, radius: 3)
-        drawCentered(ctx, text, f: f, color: white, cx: b.midX, yMid: H - b.midY, kern: 0.6)
-        if let t = target { link(b, to: t) }
+        if let t = target {
+            ctx.setFillColor(dark)
+            pill(ctx, b, radius: 3)
+            drawCentered(ctx, text, f: f, color: white, cx: b.midX, yMid: H - b.midY, kern: 0.6)
+            link(b, to: t)
+        } else {
+            drawCentered(ctx, text, f: f, color: black, cx: b.midX, yMid: H - b.midY, kern: 0.6)
+        }
     }
 }
 
@@ -392,7 +387,7 @@ func drawFuture(_ ctx: CGContext, page p: Int) {
     // Spalten links (Alastair): je Monat zwei Punktabstände, die leere Spalte am Text
     let pf = font("AvenirNext-DemiBold", 7)
     let monthCols = group.map { mi in
-        AlastairCol(w: 2 * dotSpacing, grey: nil,
+        AlastairCol(w: 2 * dotSpacing, grey: nil, boxed: mi < months.count,
                     head: pillHead(String(monthNames[futureMonths[mi].month - 1].prefix(3)), target: mi < months.count ? monthPage(mi) : nil, font: pf))
     }
     let offen = AlastairCol(w: dotSpacing, grey: nil, head: offenHead)
@@ -593,11 +588,8 @@ func drawWeek(_ ctx: CGContext, index wi: Int) {
     let dateFont = font("AvenirNext-Medium", 6)
     let dayCols = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].enumerated().map { (i, label) in
         AlastairCol(w: dotSpacing, grey: [0, 2, 4].contains(i), head: { ctx, r in
-            // Tagesknopf wie die KW- und Monatsknöpfe, darunter das Datum
-            let b = CGRect(x: r.minX + 0.75, y: r.maxY - 2 - 12, width: r.width - 1.5, height: 12)
-            ctx.setFillColor(dark)
-            pill(ctx, b, radius: 3)
-            drawCentered(ctx, label, f: font("AvenirNext-DemiBold", 6.5), color: white, cx: b.midX, yMid: top + 8)
+            // Wochentag nicht verlinkt: nur Schrift, darunter das Datum
+            drawCentered(ctx, label, f: font("Menlo-Bold", 7), color: black, cx: r.midX, yMid: top + 8)
             drawCentered(ctx, String(cal.component(.day, from: days[i])), f: dateFont, color: dark, cx: r.midX, yMid: top + 19)
         })
     }
