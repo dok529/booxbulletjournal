@@ -23,20 +23,18 @@ Die Regelseite (Seite 3) fasst zusammen, wie das Journal geführt wird.
 | × | erledigt |
 | > | migriert: verschoben oder in Collection |
 | < | zurückgestellt: Monatsseite oder Future Log |
-| @ | wartet auf jemanden, delegiert (@Name) |
 | ○ | Termin, Ereignis |
 | – | Notiz, Gedanke, Beobachtung, Fakt |
 | = | Stimmung, Gefühl, körperliches Empfinden |
-| * | wichtig (vor das Bullet) |
-| ! | Idee, Inspiration (vor das Bullet) |
-| ? | zu klären, recherchieren (vor das Bullet) |
 
 Eine durchgestrichene Aufgabe ist hinfällig.
 
 **Was wohin**
 
+Daily = erfassen · Woche = die eine Handlungsliste · Monat und Future Log = später.
+
 - Future Log: Fristen und Vorhaben ohne festen Tag ab dem nächsten Monat als Liste, Bullet in die Spalte des Monats; feste Termine gleich auf die Monatsseite. Auch aktive Collections mit Aufgaben vermerken.
-- Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats, feste Termine auch Monate im Voraus. Rechts oben: Projekte, Themen und aktive Collections, die weitere Aufgaben enthalten können; rechts unten: konkrete Aufgaben des Monats.
+- Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats, feste Termine auch Monate im Voraus. Rechts oben: Projekte, Themen und aktive Collections, die weitere Aufgaben enthalten können; rechts unten: Aufgaben des Monats, die noch keiner Woche zugeordnet sind.
 - Woche: Aufgaben und Termine dieser Woche als Liste, Bullet in die Spalte des Tages; daneben das Bullet der Aufgabe. Nx = geht in der Folgewoche weiter.
 - Daily: Tageslog mit Datum als Überschrift, kurz mit Bullets. Stimmungen mit =, gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert.
 - Collection: alles ohne Datum (Ideen, Listen, Projekte); neue Collections in den Index eintragen.
@@ -46,7 +44,11 @@ Eine durchgestrichene Aufgabe ist hinfällig.
 **Rhythmus**
 
 - Täglich: Daily datieren, mitloggen, abends abhaken oder in der Woche weiterplanen.
-- Wöchentlich: jede offene Aufgabe mit > in die neue Woche oder eine Collection, mit < zurück auf Monat / Future Log, oder streichen. Dann auf der Monatsseite nachsehen, was in die neue Woche fällt, und übertragen.
+- Wöchentlich:
+  - [ ] Dailys durchgehen, Offenes in die Woche
+  - [ ] Jede offene •: > neue Woche / Collection, < Monat / Future Log, oder streichen
+  - [ ] Monatsseite: was fällt in die neue Woche?
+  - [ ] Collections überfliegen
 - Monatlich: Future Log des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen. =-Einträge überfliegen: Was wiederholt sich?
 
 Migrieren ist ein Filter: Was das Abschreiben nicht wert ist, wird gestrichen.

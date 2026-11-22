@@ -627,13 +627,10 @@ func drawRules(_ ctx: CGContext) {
     // Bullets: zwei Spalten, Symbol + Bedeutung
     var y = section(ctx, "BULLETS", y: cTop + 2)
     let bullets: [[(String, String)]] = [
-        [("•", "**Aufgabe**"), ("/", "**angefangen**; zweiter Strich macht daraus ×"), ("×", "**erledigt**"), (">", "**migriert**: verschoben oder in Collection"),
-         ("<", "**zurückgestellt**: Monatsseite oder Future Log"),
-         ("@", "**wartet** auf jemanden, delegiert (@Name)")],
-        [("○", "**Termin**, Ereignis"), ("–", "**Notiz**, Gedanke, Beobachtung, Fakt"),
-         ("=", "**Stimmung**, Gefühl, körperliches Empfinden"), ("*", "**wichtig** (vor das Bullet)"),
-         ("!", "**Idee**, Inspiration (vor das Bullet)"),
-         ("?", "**zu klären**, recherchieren (vor das Bullet)")],
+        [("•", "**Aufgabe**"), ("/", "**angefangen**; zweiter Strich macht daraus ×"), ("×", "**erledigt**"),
+         (">", "**migriert**: verschoben oder in Collection")],
+        [("<", "**zurückgestellt**: Monatsseite oder Future Log"), ("○", "**Termin**, Ereignis"),
+         ("–", "**Notiz**, Gedanke, Beobachtung, Fakt"), ("=", "**Stimmung**, Gefühl, körperliches Empfinden")],
     ]
     let symFont = font("AvenirNext-Medium", 13)
     let colW = (cRight - cLeft) / 2, rowH: CGFloat = 14
@@ -650,12 +647,14 @@ func drawRules(_ ctx: CGContext) {
 
     // Was wohin: vom Langfristigen zum Heute
     y = section(ctx, "WAS WOHIN", y: y)
+    y += paragraph(ctx, "**Daily** = erfassen · **Woche** = die eine Handlungsliste · **Monat** und **Future Log** = später.",
+                   x: cLeft, y: y, w: cRight - cLeft) + 6
     let places: [(String, String)] = [
         ("FUTURE LOG", "Fristen und Vorhaben **ohne festen Tag** ab dem nächsten Monat als Liste, Bullet in die **Spalte des Monats**; "
             + "**feste Termine** gleich auf die Monatsseite. Auch **aktive Collections mit Aufgaben** vermerken."),
         ("MONAT", "**Die Monatsseite ist das Future Log der Wochen.** Links an den Tag: Termine und Fristen dieses Monats, "
             + "**feste Termine** auch Monate im Voraus. Rechts oben: Projekte, Themen und **aktive Collections**, "
-            + "die weitere Aufgaben enthalten können. Rechts unten: konkrete Aufgaben des Monats."),
+            + "die weitere Aufgaben enthalten können. Rechts unten: Aufgaben des Monats, die noch keiner Woche zugeordnet sind."),
         ("WOCHE", "Aufgaben und Termine **dieser Woche** als Liste, Bullet in die **Spalte des Tages**; daneben das Bullet "
             + "der Aufgabe. **Nx** = geht in der Folgewoche weiter."),
         ("DAILY", "Tageslog: Datum als Überschrift, dann kurz mit Bullets notieren. **Stimmungen mit =**, "
@@ -671,8 +670,10 @@ func drawRules(_ ctx: CGContext) {
     y = section(ctx, "RHYTHMUS", y: y)
     let rhythm: [(String, String)] = [
         ("TÄGLICH", "Morgens die Daily datieren, über den Tag mitloggen. Abends abhaken: × oder in der Woche weiterplanen."),
-        ("WÖCHENTLICH", "Jede offene • der Woche: **>** in die neue Woche oder eine Collection, **<** zurück auf Monat / Future Log, oder streichen. "
-            + "Dann auf der **Monatsseite** nachsehen, was in die neue Woche fällt, und übertragen. Neue Daily kopieren."),
+        ("WÖCHENTLICH", "☐ Dailys durchgehen, Offenes in die Woche\n"
+            + "☐ Jede offene •: **>** neue Woche / Collection, **<** Monat / Future Log, oder streichen\n"
+            + "☐ **Monatsseite**: was fällt in die neue Woche?\n"
+            + "☐ Collections überfliegen"),
         ("MONATLICH", "**Future Log** des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen. "
             + "**=-Einträge** überfliegen: Was wiederholt sich?"),
     ]
