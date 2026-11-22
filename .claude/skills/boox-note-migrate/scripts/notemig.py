@@ -115,7 +115,14 @@ def pdf_keys(path):
     out = subprocess.run(["swift", os.path.join(HERE, "pdf_keys.swift"), path],
                          check=True, capture_output=True, text=True).stdout.splitlines()
     _, w, h = out[0].split("\t")
-    return (float(w), float(h)), [l.split("\t", 1)[1] for l in out[1:]]
+    return (float(w), float(h)), [l.split("\t")[1] for l in out[1:]]
+
+
+def pdf_texts(path):
+    """Ganzer Seitentext je Seite (ohne Leerraum), um gleich aussehende Seiten sicher zu erkennen."""
+    out = subprocess.run(["swift", os.path.join(HERE, "pdf_keys.swift"), path],
+                         check=True, capture_output=True, text=True).stdout.splitlines()
+    return [(l.split("\t") + ["", ""])[2] for l in out[1:]]
 
 
 def pdf_page_objects(data):
@@ -170,6 +177,7 @@ def cmd_plan(a):
     old = Note(a.note, a.work)
     _, okeys = pdf_keys(old.pdf)
     _, nkeys = pdf_keys(os.path.abspath(a.pdf))
+    ntexts = pdf_texts(os.path.abspath(a.pdf))
 
     # alte PDF-Seite -> neue PDF-Seite: gleicher Schlüssel in Reihenfolge, sonst längstes gleiches Präfix
     bykey = collections.defaultdict(list)
@@ -196,8 +204,9 @@ def cmd_plan(a):
         elif old.strokes.get(pid):
             unplaced.append(pid)
 
-    # weitere alte Seiten derselben Vorlage (auf dem BOOX kopiert): auf eine freie neue Seite
-    # mit gleichem Schlüssel direkt dahinter, sonst als Kopie; ohne Striche nur als Link-Alias
+    # weitere alte Seiten derselben Vorlage (auf dem BOOX kopiert): auf eine freie neue Seite direkt dahinter,
+    # wenn sie inhaltlich gleich ist (ganzer Seitentext, nicht nur die Überschrift), sonst als Kopie;
+    # ohne Striche nur als Link-Alias
     assigned, copies = {}, collections.defaultdict(list)
     for i in sorted(by_new):
         first, *rest = by_new[i]
@@ -208,7 +217,7 @@ def cmd_plan(a):
                 aliases[pid] = first
                 continue
             nxt = j + 1
-            if nxt < len(nkeys) and nkeys[nxt] == nkeys[i] and nxt not in by_new and nxt not in assigned:
+            if nxt < len(nkeys) and ntexts[nxt] == ntexts[i] and nxt not in by_new and nxt not in assigned:
                 assigned[nxt] = pid
                 j = nxt
             else:

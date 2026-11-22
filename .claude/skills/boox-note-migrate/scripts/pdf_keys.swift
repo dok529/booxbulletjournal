@@ -1,5 +1,5 @@
 // Gibt Seitengröße und je Seite einen Schlüssel aus (erste Textzeile ohne Leerraum),
-// über den plan Seiten zwischen alter und neuer PDF-Version zuordnet.
+// über den plan Seiten zwischen alter und neuer PDF-Version zuordnet, dazu den ganzen Seitentext ohne Leerraum.
 // Aufruf: swift pdf_keys.swift Datei.pdf
 import PDFKit
 
@@ -11,6 +11,7 @@ guard CommandLine.arguments.count > 1,
 let box = doc.page(at: 0)!.bounds(for: .mediaBox)
 print("SIZE\t\(box.width)\t\(box.height)")
 for i in 0..<doc.pageCount {
-    let first = (doc.page(at: i)?.string ?? "").split(separator: "\n").first.map(String.init) ?? ""
-    print("\(i)\t\(first.filter { !$0.isWhitespace })")
+    let text = doc.page(at: i)?.string ?? ""
+    let first = text.split(separator: "\n").first.map(String.init) ?? ""
+    print("\(i)\t\(first.filter { !$0.isWhitespace })\t\(text.filter { !$0.isWhitespace })")
 }

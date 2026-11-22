@@ -27,7 +27,7 @@ Die Skripte liegen in `scripts/` (Pfad relativ zu diesem Skill). Python immer mi
 python3 -I scripts/notemig.py --work <scratch> plan ALT.note <scratch>/NEU.pdf -o <scratch>/plan.json
 ```
 
-`plan` ordnet jede alte Seite über ihre PDF-Überschrift (erste Textzeile) einer neuen PDF-Seite zu. Auf dem BOOX kopierte Seiten (mehrere Notizseiten mit derselben Vorlagenseite) werden zu Kopien der neuen Seite. Gibt es im neuen PDF schon eine freie gleichnamige Folgeseite, z. B. eine zweite Daily, landen sie dort. Kopierte Seiten ohne Striche entfallen, bleiben aber Link-Ziele.
+`plan` ordnet jede alte Seite über ihre PDF-Überschrift (erste Textzeile) einer neuen PDF-Seite zu. Auf dem BOOX kopierte Seiten (mehrere Notizseiten mit derselben Vorlagenseite) werden zu Kopien der neuen Seite. Gibt es im neuen PDF direkt dahinter eine freie Seite mit **demselben Seitentext**, z. B. eine zweite Daily, landen sie dort. Gleiche Überschrift allein reicht nicht: Zwei Gewohnheitsseiten verschiedener Jahre beginnen gleich, haben aber ein anderes Layout. Kopierte Seiten ohne Striche entfallen, bleiben aber Link-Ziele.
 
 Die Ausgabe listet alle Seiten mit Strichen. Prüfe sie und lege sie dem Nutzer vor:
 - **„[ähnlich]“**: Die Überschrift hat sich geändert, die Zuordnung ist nur geraten. Bestätigen lassen.
@@ -77,7 +77,7 @@ python3 -I scripts/compare.py --work <scratch> ALT.note "<Ziel>.note" <scratch>/
 
 `compare` vergleicht die Seitendaten alt/neu feldweise. Erwartet sind nur Änderungen an Seiten-ID, Seitennummer, PDF-Pfad und PDF-Verweis. Alles, was als „PRÜFEN“ erscheint, ist ein Verlust und muss vor dem Abliefern erklärt oder behoben werden.
 
-`check` prüft die Seiten-IDs, die PDF-Verweise, die Punktedateien und die Link-Ziele. `overlay.swift` legt die Striche rot über die PDF-Seiten. Sieh dir die Kontrollbilder der Seiten mit Strichen selbst an, verkleinert mit `sips -Z 900`. Sie dienen nur deiner Prüfung: Leg sie nicht ins Projekt und zeig sie nur, wenn der Nutzer danach fragt.
+`check` prüft die Seiten-IDs, die PDF-Verweise, die Punktedateien und die Link-Ziele. `overlay.swift` legt die Striche rot über die PDF-Seiten. Sieh dir **alle** Kontrollbilder der Seiten mit Strichen selbst an, verkleinert mit `sips -Z 900`, nicht nur Stichproben. Achte besonders auf kopierte Seiten: Liegt die Schrift auf der Vorlage, auf der sie geschrieben wurde? `check` und `compare` erkennen eine falsche Zielseite nicht. Sie dienen nur deiner Prüfung: Leg sie nicht ins Projekt und zeig sie nur, wenn der Nutzer danach fragt.
 
 ### 6. Berichten
 
