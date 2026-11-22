@@ -216,7 +216,7 @@ struct AlastairCol {
 @discardableResult
 func alastairBlock(_ ctx: CGContext, _ cols: [AlastairCol], left: Bool, x0: CGFloat, x1: CGFloat, top: CGFloat, headH: CGFloat, bottom: CGFloat) -> (CGFloat, CGFloat) {
     let total = cols.reduce(0) { $0 + $1.w }
-    let start = left ? x0 : x1 - total
+    let start = left ? snapUp(x0, gridX0) : snapDown(x1 - total, gridX0)   // Spaltengrenzen auf dem gemeinsamen Raster
     var x = start
     for (k, c) in cols.enumerated() {
         let d = left ? cols.count - 1 - k : k
@@ -227,19 +227,7 @@ func alastairBlock(_ ctx: CGContext, _ cols: [AlastairCol], left: Bool, x0: CGFl
         c.head(ctx, rect(x, top, c.w, headH))
         x += c.w
     }
-    let boundary = left ? start + total : start
-    ctx.setFillColor(gridDot)
-    var bx = boundary
-    while bx - dotSpacing >= x0 - 0.1 { bx -= dotSpacing }
-    var py = top + headH + dotSpacing / 2
-    while py <= bottom {
-        var px = bx
-        while px <= x1 + 0.1 {
-            ctx.fillEllipse(in: rect(px - 0.65, py - 0.65, 1.3, 1.3))
-            px += dotSpacing
-        }
-        py += dotSpacing
-    }
+    dots(ctx, x0: x0, y0: top + headH + 2, x1: x1, y1: bottom)
     return left ? (start + total, x1) : (x0, start)
 }
 
@@ -284,15 +272,36 @@ func label(_ ctx: CGContext, _ s: String, x: CGFloat, yMid: CGFloat, color: CGCo
     drawText(ctx, line(s, f, color, kern: 1.2), x: x, yMid: yMid, f: f)
 }
 
+// Gemeinsames Punktraster für alle Seiten: Punkte bei gridX0 + n·dotSpacing und gridY0 + n·dotSpacing,
+// damit sie beim Blättern an derselben Stelle bleiben
+let gridX0 = margin, gridY0 = contentTop + 24 + dotSpacing / 2 - 2 * dotSpacing
+
+func snapUp(_ v: CGFloat, _ o: CGFloat) -> CGFloat { o + (((v - o) / dotSpacing) - 0.001).rounded(.up) * dotSpacing }
+func snapDown(_ v: CGFloat, _ o: CGFloat) -> CGFloat { o + (((v - o) / dotSpacing) + 0.001).rounded(.down) * dotSpacing }
+
+/// Punkte des gemeinsamen Rasters innerhalb des Rechtecks
 func dots(_ ctx: CGContext, x0: CGFloat, y0: CGFloat, x1: CGFloat, y1: CGFloat) {
-    let cols = Int((x1 - x0) / dotSpacing), rows = Int((y1 - y0) / dotSpacing)
-    let ox = x0 + ((x1 - x0) - CGFloat(cols) * dotSpacing) / 2
-    let oy = y0 + ((y1 - y0) - CGFloat(rows) * dotSpacing) / 2
-    ctx.setFillColor(gridDot)
-    for i in 0...cols { for j in 0...rows {
-        let x = ox + CGFloat(i) * dotSpacing, y = oy + CGFloat(j) * dotSpacing
-        ctx.fillEllipse(in: rect(x - 0.65, y - 0.65, 1.3, 1.3))
-    } }
+    dotGrid(ctx, x0: snapUp(x0, gridX0), x1: snapDown(x1, gridX0), y0: snapUp(y0, gridY0), y1: snapDown(y1, gridY0))
+}
+
+/// Punktraster als PDF-Kachelmuster statt Einzelpunkten (kleinere Datei, schnelleres Blättern).
+/// x0/y0 = erster Punkt, x1/y1 = letzter Punkt (Koordinaten von oben links), Abstand dotSpacing.
+func dotGrid(_ ctx: CGContext, x0: CGFloat, x1: CGFloat, y0: CGFloat, y1: CGFloat) {
+    guard x1 >= x0, y1 >= y0 else { return }
+    var callbacks = CGPatternCallbacks(version: 0, drawPattern: { _, c in
+        c.setFillColor(gridDot)
+        c.fillEllipse(in: CGRect(x: dotSpacing / 2 - 0.65, y: dotSpacing / 2 - 0.65, width: 1.3, height: 1.3))
+    }, releaseInfo: nil)
+    let m = CGAffineTransform(translationX: x0 - dotSpacing / 2, y: H - y1 - dotSpacing / 2)
+    guard let pattern = CGPattern(info: nil, bounds: CGRect(x: 0, y: 0, width: dotSpacing, height: dotSpacing), matrix: m,
+                                  xStep: dotSpacing, yStep: dotSpacing, tiling: .noDistortion, isColored: true,
+                                  callbacks: &callbacks) else { return }
+    ctx.saveGState()
+    ctx.setFillColorSpace(CGColorSpace(patternBaseSpace: nil)!)
+    var alpha: CGFloat = 1
+    ctx.setFillPattern(pattern, colorComponents: &alpha)
+    ctx.fill(rect(x0 - 0.7, y0 - 0.7, x1 - x0 + 1.4, y1 - y0 + 1.4))
+    ctx.restoreGState()
 }
 
 // 0) Deckblatt: Titel + Zeitraum, unten alle Monate nach Jahren als Links
@@ -370,7 +379,10 @@ func drawFuture(_ ctx: CGContext, page p: Int) {
     let title = line("FUTURE LOG \(fy)", tf, black, kern: 1.5)
     drawText(ctx, title, x: margin, yMid: headMid, f: tf)
     drawText(ctx, line(span, rf, dark, kern: 0.8), x: margin + width(title) + 8, yMid: headMid + 1, f: rf)
-    navButtons(ctx, [("INDEX", indexPage)])
+    var nav: [(label: String, target: Int)] = []
+    if p > 0 { nav.append(("‹", goalsPage + p)) }
+    if p < futureCount - 1 { nav.append(("›", goalsPage + 2 + p)) }
+    navButtons(ctx, nav + [("INDEX", indexPage)])
     ctx.setStrokeColor(dark)
     ctx.setLineWidth(0.6)
     strokeLine(ctx, margin, headRule, W - margin, headRule)
@@ -687,7 +699,7 @@ func drawRules(_ ctx: CGContext) {
     let rhythm: [(String, String)] = [
         ("TÄGLICH", "Morgens die Daily datieren, über den Tag mitloggen. Abends abhaken: × oder in der Woche weiterplanen."),
         ("WÖCHENTLICH", "☐ Dailys durchgehen, Offenes in die Woche\n"
-            + "☐ Jede offene •: **>** neue Woche / Collection, **<** Monat / Future Log, oder streichen\n"
+            + "☐ Jede offene •: Zeichen in die **leere Spalte**, oder streichen\n"
             + "☐ **Monatsseite**: was fällt in die neue Woche?\n"
             + "☐ Collections überfliegen"),
         ("MONATLICH", "**Future Log** des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen. "

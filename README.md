@@ -48,7 +48,7 @@ Daily = erfassen · Woche = die eine Handlungsliste · Monat und Future Log = sp
 - Täglich: Daily datieren, mitloggen, abends abhaken oder in der Woche weiterplanen.
 - Wöchentlich:
   - [ ] Dailys durchgehen, Offenes in die Woche
-  - [ ] Jede offene •: > neue Woche / Collection, < Monat / Future Log, oder streichen
+  - [ ] Jede offene •: Zeichen in die leere Spalte, oder streichen
   - [ ] Monatsseite: was fällt in die neue Woche?
   - [ ] Collections überfliegen
 - Monatlich: Future Log des neuen Monats auf die Monatsseite übertragen, offene Themen migrieren oder streichen. =-Einträge überfliegen: Was wiederholt sich?
@@ -63,7 +63,7 @@ Navigation über PDF-Links:
 - Index: vorbelegte Einträge für Regeln, Jahresziele, Future Log, alle Monate, die Wochen, die Gewohnheiten und die Collections
 - Regeln: FUTURE, INDEX
 - Jahresziele: FUTURE, INDEX
-- Future Log: Monatsknöpfe über den Spalten → Monat, INDEX
+- Future Log: ‹ › Vor-/Folgequartal, Monatsknöpfe über den Spalten → Monat, INDEX
 - Monat: ‹ › Vor-/Folgemonat, KW-Badges und KW-Spaltenköpfe → Woche, FUTURE, INDEX
 - Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, FUTURE, INDEX
 - Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE, INDEX
@@ -88,7 +88,7 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 149–150 | Gewohnheits-Tracker 2026 und 2027: je Kalenderjahr eine Seite (pro Gewohnheit auf dem BOOX kopieren), alle Wochen des Jahres als Zeilen Mo–So in zwei Spalten |
 | 151–152 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
-Format 458,88 × 597,12 pt (3:4).
+Format 458,88 × 597,12 pt (3:4). Alle Seiten mit Punktraster nutzen dasselbe 5-mm-Raster mit festem Ursprung; es ist als PDF-Muster angelegt (kleine Datei, schnelles Blättern).
 
 ## Vorschau
 
