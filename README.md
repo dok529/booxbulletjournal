@@ -74,7 +74,7 @@ Navigation über PDF-Links:
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt oder
 kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 
-## Inhalt von `BuJo-2027 V4.pdf`
+## Inhalt von `BuJo-2027 V4.1.pdf`
 
 | Seiten | Inhalt |
 |---|---|
@@ -88,7 +88,7 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 149–150 | Gewohnheits-Tracker 2026 und 2027: je Kalenderjahr eine Seite (pro Gewohnheit auf dem BOOX kopieren), alle Wochen des Jahres als Zeilen Mo–So in zwei Spalten |
 | 151–152 | Collections: leere Schreiblinie für das Thema, Punktraster |
 
-Format 458,88 × 597,12 pt (3:4). Alle Seiten mit Punktraster nutzen dasselbe 5-mm-Raster mit festem Ursprung; es ist als PDF-Muster angelegt (kleine Datei, schnelles Blättern).
+Format 458,88 × 597,12 pt (3:4). Alle Seiten mit Punktraster nutzen dasselbe 5-mm-Raster mit festem Ursprung; jeder Punkt ist einzeln positioniert (exakt auch auf dem BOOX) und sparsam gezeichnet (kleine Datei).
 
 ## Vorschau
 

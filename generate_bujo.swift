@@ -16,7 +16,7 @@ let endYear = 2027, endMonth = 12
 let futureExtraMonths = 3   // Future Log reicht so viele Monate über das Ende hinaus (ohne Monatsseite)
 let output = CommandLine.arguments.count > 1
     ? CommandLine.arguments[1]
-    : "BuJo-2027 V4.pdf"
+    : "BuJo-2027 V4.1.pdf"
 
 // Seitenformat wie der Original-Planer (OnPlanners, vertikal)
 let W: CGFloat = 458.88, H: CGFloat = 597.12
@@ -284,23 +284,25 @@ func dots(_ ctx: CGContext, x0: CGFloat, y0: CGFloat, x1: CGFloat, y1: CGFloat) 
     dotGrid(ctx, x0: snapUp(x0, gridX0), x1: snapDown(x1, gridX0), y0: snapUp(y0, gridY0), y1: snapDown(y1, gridY0))
 }
 
-/// Punktraster als PDF-Kachelmuster statt Einzelpunkten (kleinere Datei, schnelleres Blättern).
+/// Punktraster: jeder Punkt ist ein Strich der Länge null mit runder Kappe, alle in einem Pfad.
+/// Jeder Punkt hat eine eigene Koordinate (exakt auch auf dem BOOX, anders als Muster oder Strichelung)
+/// und braucht nur zwei Pfadbefehle statt eines Kreises (kleinere Datei).
 /// x0/y0 = erster Punkt, x1/y1 = letzter Punkt (Koordinaten von oben links), Abstand dotSpacing.
 func dotGrid(_ ctx: CGContext, x0: CGFloat, x1: CGFloat, y0: CGFloat, y1: CGFloat) {
     guard x1 >= x0, y1 >= y0 else { return }
-    var callbacks = CGPatternCallbacks(version: 0, drawPattern: { _, c in
-        c.setFillColor(gridDot)
-        c.fillEllipse(in: CGRect(x: dotSpacing / 2 - 0.65, y: dotSpacing / 2 - 0.65, width: 1.3, height: 1.3))
-    }, releaseInfo: nil)
-    let m = CGAffineTransform(translationX: x0 - dotSpacing / 2, y: H - y1 - dotSpacing / 2)
-    guard let pattern = CGPattern(info: nil, bounds: CGRect(x: 0, y: 0, width: dotSpacing, height: dotSpacing), matrix: m,
-                                  xStep: dotSpacing, yStep: dotSpacing, tiling: .noDistortion, isColored: true,
-                                  callbacks: &callbacks) else { return }
+    let nx = Int(((x1 - x0) / dotSpacing).rounded()), ny = Int(((y1 - y0) / dotSpacing).rounded())
     ctx.saveGState()
-    ctx.setFillColorSpace(CGColorSpace(patternBaseSpace: nil)!)
-    var alpha: CGFloat = 1
-    ctx.setFillPattern(pattern, colorComponents: &alpha)
-    ctx.fill(rect(x0 - 0.7, y0 - 0.7, x1 - x0 + 1.4, y1 - y0 + 1.4))
+    ctx.setStrokeColor(gridDot)
+    ctx.setLineWidth(1.3)
+    ctx.setLineCap(.round)
+    for j in 0...ny {
+        for i in 0...nx {
+            let p = CGPoint(x: x0 + CGFloat(i) * dotSpacing, y: H - (y0 + CGFloat(j) * dotSpacing))
+            ctx.move(to: p)
+            ctx.addLine(to: p)
+        }
+    }
+    ctx.strokePath()
     ctx.restoreGState()
 }
 
