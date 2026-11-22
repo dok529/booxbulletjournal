@@ -35,9 +35,9 @@ Eine durchgestrichene Aufgabe ist hinfällig.
 
 **Was wohin**
 
-- Future Log: Fristen und Vorhaben ohne festen Tag ab dem nächsten Monat, unter den Monat; feste Termine gleich auf die Monatsseite. Auch aktive Collections mit Aufgaben vermerken.
-- Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats, feste Termine auch Monate im Voraus. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen; rechts unten: konkrete Aufgaben des Monats. Aktive Collections mit Aufgaben hier vermerken.
-- Woche: Aufgaben und Termine dieser Woche. In den Tagesspalten: • geplant, × erledigt, > verschoben (am neuen Tag •), ○ Termin; daneben das Bullet der Aufgabe. Nx = geht in der Folgewoche weiter.
+- Future Log: Fristen und Vorhaben ohne festen Tag ab dem nächsten Monat als Liste, Bullet in die Spalte des Monats; feste Termine gleich auf die Monatsseite. Auch aktive Collections mit Aufgaben vermerken.
+- Monat: Die Monatsseite ist das Future Log der Wochen. Links an den Tag: Termine und Fristen dieses Monats, feste Termine auch Monate im Voraus. Rechts oben: Projekte, Themen und aktive Collections, die weitere Aufgaben enthalten können; rechts unten: konkrete Aufgaben des Monats.
+- Woche: Aufgaben und Termine dieser Woche als Liste, Bullet in die Spalte des Tages; daneben das Bullet der Aufgabe. Nx = geht in der Folgewoche weiter.
 - Daily: Tageslog mit Datum als Überschrift, kurz mit Bullets. Stimmungen mit =, gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert.
 - Collection: alles ohne Datum (Ideen, Listen, Projekte); neue Collections in den Index eintragen.
 - Gewohnheit: was sich regelmäßig wiederholt, eine Seite pro Gewohnheit.
@@ -59,7 +59,7 @@ Navigation über PDF-Links:
 - Index: vorbelegte Einträge für Regeln, Jahresziele, Future Log, alle Monate, die Wochen, die Gewohnheiten und die Collections
 - Regeln: FUTURE, INDEX
 - Jahresziele: FUTURE, INDEX
-- Future Log: Monatsbalken → Monat, INDEX
+- Future Log: Monatsknöpfe über den Spalten → Monat, INDEX
 - Monat: ‹ › Vor-/Folgemonat, KW-Badges → Woche, FUTURE, INDEX
 - Woche: ‹ › Vor-/Folgewoche, Monatsknöpfe (z. B. DEZ, JAN) → Monat, FUTURE, INDEX
 - Wochen-Daily: KW → Woche, Monatsknöpfe → Monat, FUTURE, INDEX
@@ -78,7 +78,7 @@ kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 | 2 | Index (Thema / Seiten) |
 | 3 | Regeln: Bullets, was wohin, Rhythmus, Faustregeln |
 | 4 | Jahresziele: sechs Lebensbereiche mit Zufriedenheit 1–10 und Zielen, darunter nach kurz / mittel / lang sortieren |
-| 5–10 | Future Log, ein Kalenderquartal pro Seite: Nov/Dez 2026, vier Quartale 2027, Jan–Mär 2028 (ohne Monatsseite) |
+| 5–10 | Future Log nach der Alastair-Methode, ein Kalenderquartal pro Seite: links eine Spalte je Monat, rechts die Liste, Punktraster. Nov/Dez 2026, vier Quartale 2027, Jan–Mär 2028 (ohne Monatsseite) |
 | 11–24 | Monatsseiten Nov 2026 – Dez 2027 (Tagesliste mit KW + Punktraster) |
 | 25–148 | KW 44/2026 – KW 52/2027, je zwei Seiten: Wochenseite nach der Alastair-Methode (Spalten Mo–So mit Datum und Nx links, Bullet-Spalte, Aufgaben) und Wochen-Daily (Datumsbereich, Punktraster) |
 | 149–150 | Gewohnheits-Tracker 2026 und 2027: je Kalenderjahr eine Seite (pro Gewohnheit auf dem BOOX kopieren), alle Wochen des Jahres als Zeilen Mo–So in zwei Spalten |

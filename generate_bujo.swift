@@ -299,43 +299,49 @@ func drawIndex(_ ctx: CGContext) {
     }
 }
 
-// 2) Future Log: ein Kalenderquartal pro Seite, je Mini-Kalender + Punktraster; Monatsbalken verlinken auf die Monatsseite
+// 2) Future Log nach der Alastair-Methode: ein Kalenderquartal pro Seite, links eine Spalte je Monat
+//    (Bullet in die Spalte des Monats), rechts die Liste; nur Punktraster. Monatsknöpfe verlinken auf die Monatsseite.
 func drawFuture(_ ctx: CGContext, page p: Int) {
-    pageTitle(ctx, "FUTURE LOG")
+    let group = futureGroups[p]
+    let (fy, fm) = futureMonths[group.first!], (_, lm) = futureMonths[group.last!]
+    let span = fm == lm ? monthNames[fm - 1] : "\(monthNames[fm - 1]) – \(monthNames[lm - 1])"
+    habitTarget = trackerPage(forYear: min(fy, endYear))
+    let tf = font("AvenirNext-Regular", 18), rf = font("AvenirNext-Medium", 8.5)
+    let title = line("FUTURE LOG \(fy)", tf, black, kern: 1.5)
+    drawText(ctx, title, x: margin, yMid: headMid, f: tf)
+    drawText(ctx, line(span, rf, dark, kern: 0.8), x: margin + width(title) + 8, yMid: headMid + 1, f: rf)
     navButtons(ctx, [("INDEX", indexPage)])
-    let secH = (cBottom - cTop) / 3, barH: CGFloat = 17
-    let mf = font("Menlo-Regular", 6.5), mfb = font("Menlo-Bold", 6.5)
-    for (s, mi) in futureGroups[p].enumerated() {
-        let (y, m) = futureMonths[mi]
-        let top = cTop + CGFloat(s) * secH
-        let bar = rect(cLeft, top, cRight - cLeft, barH)
-        ctx.setFillColor(dark)
-        pill(ctx, bar, radius: 3)
-        label(ctx, "\(monthNames[m - 1]) \(y)", x: cLeft + 8, yMid: top + barH / 2, color: white)
-        if mi < months.count {   // Monate nach dem Zeitraum haben keine Monatsseite
-            let more = line("ZUM MONAT ›", font("AvenirNext-DemiBold", 7.5), white, kern: 1.2)
-            drawText(ctx, more, x: cRight - 8 - width(more), yMid: top + barH / 2, f: font("AvenirNext-DemiBold", 7.5))
-            link(bar, to: monthPage(mi))
-        }
+    ctx.setStrokeColor(dark)
+    ctx.setLineWidth(0.6)
+    strokeLine(ctx, margin, headRule, W - margin, headRule)
 
-        // Mini-Kalender Mo–So
-        let calX = cLeft, calW: CGFloat = 126, cellW = calW / 7, cellH: CGFloat = 15
-        let calTop = top + barH + 6
-        for (i, d) in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].enumerated() {
-            drawCentered(ctx, d, f: mfb, color: i >= 5 ? rule : black, cx: calX + (CGFloat(i) + 0.5) * cellW, yMid: calTop + cellH / 2)
+    // Monatsspalten: je zwei Punktabstände breit; die letzte grau, davon aus abwechselnd
+    let top = cTop + 2, headH: CGFloat = 20, colW = 2 * dotSpacing
+    let pf = font("AvenirNext-DemiBold", 7)
+    for (k, mi) in group.enumerated() {
+        let m = futureMonths[mi].month
+        let x = cLeft + CGFloat(k) * colW
+        if (group.count - 1 - k) % 2 == 0 {
+            ctx.setFillColor(light)
+            ctx.fill(rect(x, top, colW, cBottom - top))
         }
-        let first = cal.date(from: DateComponents(year: y, month: m, day: 1))!
-        let days = cal.range(of: .day, in: .month, for: first)!.count
-        let offset = (cal.component(.weekday, from: first) + 5) % 7 // Mo = 0
-        for d in 1...days {
-            let idx = offset + d - 1, col = idx % 7, row = idx / 7
-            let cx = calX + (CGFloat(col) + 0.5) * cellW, cy = calTop + cellH * (CGFloat(row) + 1.5)
-            if col >= 5 { ctx.setFillColor(light); ctx.fill(rect(cx - cellW / 2, cy - cellH / 2, cellW, cellH)) }
-            drawCentered(ctx, String(d), f: mf, color: black, cx: cx, yMid: cy)
+        let r = rect(x + 1.5, top + 2, colW - 3, 13)
+        ctx.setFillColor(dark)
+        pill(ctx, r, radius: 3)
+        drawCentered(ctx, String(monthNames[m - 1].prefix(3)), f: pf, color: white, cx: r.midX, yMid: top + 8.5, kern: 0.8)
+        if mi < months.count { link(r, to: monthPage(mi)) }   // Monate nach dem Zeitraum haben keine Monatsseite
+    }
+
+    // Punktraster am linken Rand ausgerichtet, damit die Punkte mittig in den Monatsspalten liegen
+    ctx.setFillColor(gridDot)
+    var py = top + headH + dotSpacing / 2
+    while py <= cBottom {
+        var px = cLeft + dotSpacing / 2
+        while px <= cRight {
+            ctx.fillEllipse(in: rect(px - 0.65, py - 0.65, 1.3, 1.3))
+            px += dotSpacing
         }
-        ctx.setStrokeColor(rule); ctx.setLineWidth(0.5)
-        strokeLine(ctx, calX + calW + 8, top + barH + 6, calX + calW + 8, top + secH - 8)
-        dots(ctx, x0: calX + calW + 16, y0: top + barH + 6, x1: cRight, y1: top + secH - 8)
+        py += dotSpacing
     }
 }
 
@@ -645,14 +651,13 @@ func drawRules(_ ctx: CGContext) {
     // Was wohin: vom Langfristigen zum Heute
     y = section(ctx, "WAS WOHIN", y: y)
     let places: [(String, String)] = [
-        ("FUTURE LOG", "Fristen und Vorhaben **ohne festen Tag** ab dem nächsten Monat, unter den Monat; **feste Termine** gleich "
-            + "auf die Monatsseite. Auch **aktive Collections mit Aufgaben** vermerken."),
+        ("FUTURE LOG", "Fristen und Vorhaben **ohne festen Tag** ab dem nächsten Monat als Liste, Bullet in die **Spalte des Monats**; "
+            + "**feste Termine** gleich auf die Monatsseite. Auch **aktive Collections mit Aufgaben** vermerken."),
         ("MONAT", "**Die Monatsseite ist das Future Log der Wochen.** Links an den Tag: Termine und Fristen dieses Monats, "
-            + "**feste Termine** auch Monate im Voraus. Rechts oben: Themen und Projekte, die noch in Aufgaben aufgeteilt werden müssen. "
-            + "Rechts unten: konkrete Aufgaben des Monats. **Aktive Collections mit Aufgaben** hier vermerken."),
-        ("WOCHE", "Aufgaben und Termine **dieser Woche**. In den Tagesspalten: **•** geplant, **×** erledigt, **>** verschoben "
-            + "(am neuen Tag •), **○** Termin; "
-            + "daneben das Bullet der Aufgabe. **Nx** = geht in der Folgewoche weiter."),
+            + "**feste Termine** auch Monate im Voraus. Rechts oben: Projekte, Themen und **aktive Collections**, "
+            + "die weitere Aufgaben enthalten können. Rechts unten: konkrete Aufgaben des Monats."),
+        ("WOCHE", "Aufgaben und Termine **dieser Woche** als Liste, Bullet in die **Spalte des Tages**; daneben das Bullet "
+            + "der Aufgabe. **Nx** = geht in der Folgewoche weiter."),
         ("DAILY", "Tageslog: Datum als Überschrift, dann kurz mit Bullets notieren. **Stimmungen mit =**, "
             + "gern eingerückt unter dem auslösenden Ereignis; sie werden nicht migriert."),
         ("COLLECTION", "Alles **ohne Datum**: Ideen, Listen, Projekte, Recherchen. Neue Collection sofort in den Index eintragen."),
