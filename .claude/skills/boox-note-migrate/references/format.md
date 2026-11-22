@@ -30,7 +30,7 @@ ZIP mit einem Ordner `<Dokument-UUID>/`, Verzeichniseinträge unkomprimiert, Dat
 
 ## Shapes (je Eintrag in der Shape-Liste)
 
-1 Shape-ID · 2/3 Zeitstempel · 5 float32 Stiftbreite · 6 Ebene (fehlt = 0) · 7 JSON-Begrenzungsrechteck (nach Matrix) · 8 optional JSON `{"values": [a,b,c,d,e,f,0,0,1]}` (Android-Matrix: x' = a·x + b·y + c, y' = d·x + e·y + f) für verschobene/skalierte Shapes · 10 optional Link: JSON mit `docBean` (documentId, pageId, pageIndex 0-basiert, title, path) · 11 JSON Stiftparameter · 12 Typ (22 Strich, 5 Linie, 2 Kreis, 15 Pfeil/Linie, 33 Link-Symbol, 60 weitere) · 16 Punkte-UUID · 18 Gruppen-UUID (= Mitte des Zip-Namens).
+1 Shape-ID · 2/3 Zeitstempel · 5 float32 Stiftbreite · 6 Ebene (fehlt = 0) · 7 JSON-Begrenzungsrechteck (nach Matrix) · 8 optional JSON `{"values": [a,b,c,d,e,f,0,0,1]}` (Android-Matrix: x' = a·x + b·y + c, y' = d·x + e·y + f) für verschobene/skalierte Shapes · 10 optional: bei Links JSON mit `docBean` (documentId, pageId, pageIndex 0-basiert, title, path), bei Textfeldern (Typ 16) der Text selbst · 11 JSON Stiftparameter · 12 Typ (22 Strich, 5 Linie, 2 Kreis, 15 Pfeil/Linie, 16 Textfeld, 33 Link-Symbol, 60 weitere) · 16 Punkte-UUID · 18 Gruppen-UUID (= Mitte des Zip-Namens).
 
 ## Punktedatei
 

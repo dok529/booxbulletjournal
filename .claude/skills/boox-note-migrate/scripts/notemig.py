@@ -153,6 +153,19 @@ def lcp(a, b):
     return n
 
 
+def link_bean(r):
+    """Link-Daten eines Shapes (Feld 10 als JSON mit docBean) oder None.
+    Feld 10 trägt bei Textfeldern (Typ 16) den Text selbst, das ist kein Link."""
+    b = getf(r, 10)
+    if not b:
+        return None
+    try:
+        bj = json.loads(b)
+    except ValueError:
+        return None
+    return bj if isinstance(bj, dict) and "docBean" in bj else None
+
+
 def cmd_plan(a):
     old = Note(a.note, a.work)
     _, okeys = pdf_keys(old.pdf)
@@ -324,9 +337,8 @@ def cmd_build(a):
                     setf(r, 8, jdump(mv))
                 else:
                     point_xf[pts][sid] = f
-            bean = getf(r, 10)
-            if bean is not None:    # Link auf eine Seite dieser Notiz
-                bj = json.loads(bean)
+            bj = link_bean(r)
+            if bj is not None:      # Link auf eine Seite dieser Notiz
                 d = bj["docBean"]
                 if d.get("documentId") == old.doc:
                     if d["pageId"] not in remap:
@@ -491,9 +503,9 @@ def cmd_check(a):
         for r in recs:
             if (getf(r, 6) or 0) not in layers[page]:
                 fail("Striche auf Ebene %d, die Seite %d nicht hat" % (getf(r, 6) or 0, n.pages.index(page) + 1))
-            bean = getf(r, 10)
-            if bean:
-                d = json.loads(bean)["docBean"]
+            bj = link_bean(r)
+            if bj:
+                d = bj["docBean"]
                 if d.get("documentId") == n.doc:
                     ok = 0 <= d["pageIndex"] < len(n.pages) and n.pages[d["pageIndex"]] == d["pageId"]
                     links.append((n.pages.index(page) + 1, d["pageIndex"] + 1, ok))
