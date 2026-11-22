@@ -74,7 +74,7 @@ Navigation über PDF-Links:
 In BOOX Notes bleiben die Links korrekt, auch wenn Seiten eingefügt oder
 kopiert werden; kopierte Seiten behalten ihre eigenen Links (getestet).
 
-## Inhalt von `BuJo-2027 V3.pdf`
+## Inhalt von `BuJo-2027 V4.pdf`
 
 | Seiten | Inhalt |
 |---|---|
