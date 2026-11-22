@@ -279,7 +279,8 @@ func dots(_ ctx: CGContext, x0: CGFloat, y0: CGFloat, x1: CGFloat, y1: CGFloat) 
     dotGrid(ctx, x0: snapUp(x0, gridX0), x1: snapDown(x1, gridX0), y0: snapUp(y0, gridY0), y1: snapDown(y1, gridY0))
 }
 
-/// Punktraster: jeder Punkt ist ein Strich der Länge null mit runder Kappe, alle in einem Pfad.
+/// Punktraster: jeder Punkt ist ein sehr kurzer Strich (0,1 pt) mit runder Kappe, alle in einem Pfad.
+/// Länge null wäre laut PDF-Standard auch ein Punkt, wird aber von Vorschau und Quick Look nicht gezeichnet.
 /// Jeder Punkt hat eine eigene Koordinate (exakt auch auf dem BOOX, anders als Muster oder Strichelung)
 /// und braucht nur zwei Pfadbefehle statt eines Kreises (kleinere Datei).
 /// x0/y0 = erster Punkt, x1/y1 = letzter Punkt (Koordinaten von oben links), Abstand dotSpacing.
@@ -293,8 +294,8 @@ func dotGrid(_ ctx: CGContext, x0: CGFloat, x1: CGFloat, y0: CGFloat, y1: CGFloa
     for j in 0...ny {
         for i in 0...nx {
             let p = CGPoint(x: x0 + CGFloat(i) * dotSpacing, y: H - (y0 + CGFloat(j) * dotSpacing))
-            ctx.move(to: p)
-            ctx.addLine(to: p)
+            ctx.move(to: CGPoint(x: p.x - 0.05, y: p.y))
+            ctx.addLine(to: CGPoint(x: p.x + 0.05, y: p.y))
         }
     }
     ctx.strokePath()
